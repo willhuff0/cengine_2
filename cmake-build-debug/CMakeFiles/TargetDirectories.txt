@@ -1,0 +1,3 @@
+C:/Users/wehuf/CLionProjects/cengine_2/cmake-build-debug/CMakeFiles/cengine_2.dir
+C:/Users/wehuf/CLionProjects/cengine_2/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/wehuf/CLionProjects/cengine_2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
