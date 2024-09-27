@@ -19,7 +19,7 @@ void freeRenderer() {
         Job* iterateVisibleObjectsDeps = NULL;
         arrput(iterateVisibleObjectsDeps, visibilityTreeExit);
 
-
+        initJob(&iterateVisibleObjectsJob, iterateVisibleObjectsDeps, NULL, "[RENDERER] Iterate Visible Objects");
     }
 
     freeJobTree(&renderTreeExit);
