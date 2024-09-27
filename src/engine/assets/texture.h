@@ -21,9 +21,9 @@ TextureID createTextureFromPath(const char* path, const bool generateMipmaps);
 // Returns -1 if an error occurs
 TextureID createTextureFromData(const char* filename, const uint8_t* buffer, const int length, const bool generateMipmaps);
 
-Texture* lookupTexture(const TextureID id);
-
 void freeTexture(const Texture* texture);
+
+Texture* lookupTexture(const TextureID id);
 
 void bindTexture(const TextureID id, const GLenum textureUnit);
 

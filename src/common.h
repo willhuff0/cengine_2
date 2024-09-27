@@ -17,4 +17,6 @@
 #include <stb_image.h>
 #include <stb_ds.h>
 
+char* readFile(const char* path);
+
 #endif //COMMON_H

@@ -21,7 +21,7 @@ static TextureID createTexture(uint8_t* data, const int width, const int height,
 
     stbi_image_free(data);
 
-    Texture texture {gl_texture};
+    const Texture texture { gl_texture };
     arrput(assets.textures, texture);
     return arrlen(assets.textures) - 1;
 }
@@ -44,18 +44,18 @@ TextureID createTextureFromData(const char* filename, const uint8_t* buffer, con
     if (data == NULL) {
         fprintf(stderr, "[TEXTURE] Failed to load image from data: %s\n", filename);
         stbi_image_free(data);
-        return false;
+        return -1;
     }
 
     return createTexture(data, width, height, GL_REPEAT, generateMipmaps);
 }
 
-Texture* lookupTexture(const TextureID id) {
-    return &assets.textures[id];
-}
-
 void freeTexture(const Texture* texture) {
     glDeleteTextures(1, &texture->texture);
+}
+
+Texture* lookupTexture(const TextureID id) {
+    return &assets.textures[id];
 }
 
 void bindTexture(const TextureID id, const GLenum textureUnit) {

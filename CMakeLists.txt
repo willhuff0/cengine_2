@@ -52,7 +52,10 @@ add_executable(cengine_2 main.c
         src/engine/assets/texture.c
         src/engine/assets/texture.h
         src/engine/assets/shader.c
-        src/engine/assets/shader.h)
+        src/engine/assets/shader.h
+        src/engine/assets/simple_material.c
+        src/engine/assets/simple_material.h
+)
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 

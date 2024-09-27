@@ -5,10 +5,13 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
+#include "assets/shader.h"
 #include "assets/texture.h"
 
 typedef struct {
     Texture* textures;
+    Shader* shaders;
+    Material* material;
 } Assets;
 
 extern Assets assets;
