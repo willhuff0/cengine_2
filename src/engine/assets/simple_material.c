@@ -4,10 +4,22 @@
 
 #include "simple_material.h"
 
-SimpleMaterialID createSimpleMaterial(ShaderID shader, vec4 color);
+#include "../assets.h"
 
-void freeSimpleMaterial(const SimpleMaterial* simpleMaterial);
+SimpleMaterialID createSimpleMaterial(const ShaderID shader, vec4 color) {
+    SimpleMaterial simpleMaterial { shader };
+    glm_vec4_copy(color, simpleMaterial.color);
 
-SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id);
+    arrput(assets.simpleMaterials, simpleMaterial);
+    return arrlen(assets.simpleMaterials) - 1;
+}
 
-void bindSimpleMaterial(const SimpleMaterialID id);
+void freeSimpleMaterial(const SimpleMaterial* simpleMaterial) { }
+
+SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id) {
+    return &assets.simpleMaterials[id];
+}
+
+void bindSimpleMaterial(const SimpleMaterialID id) {
+    bindShader(lookupSimpleMaterial(id)->shader);
+}

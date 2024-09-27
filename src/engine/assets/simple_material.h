@@ -16,7 +16,7 @@ typedef struct {
 
 // Adds a simple material to assets and returns its ID
 // Returns -1 if an error occurs
-SimpleMaterialID createSimpleMaterial(ShaderID shader, vec4 color);
+SimpleMaterialID createSimpleMaterial(const ShaderID shader, vec4 color);
 
 void freeSimpleMaterial(const SimpleMaterial* simpleMaterial);
 
