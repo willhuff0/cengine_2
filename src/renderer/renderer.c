@@ -14,6 +14,14 @@ void initRenderer() {
 void freeRenderer() {
     freeVisibility();
 
+    Job iterateVisibleObjectsJob;
+    {
+        Job* iterateVisibleObjectsDeps = NULL;
+        arrput(iterateVisibleObjectsDeps, visibilityTreeExit);
+
+
+    }
+
     freeJobTree(&renderTreeExit);
 }
 

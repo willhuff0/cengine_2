@@ -5,9 +5,11 @@
 #ifndef VISIBILITY_H
 #define VISIBILITY_H
 
+#include "../../jobs/job.h"
+
+extern Job visibilityTreeExit;
+
 void initVisibility();
 void freeVisibility();
-
-void executeVisibilityTreeSync();
 
 #endif //VISIBILITY_H

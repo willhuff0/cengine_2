@@ -4,11 +4,12 @@
 
 #include "visibility.h"
 
-#include "../../jobs/job.h"
+Job visibilityTreeExit;
 
-static Job visibilityTreeExit;
+void initVisibility() {
 
-void initVisibility();
-void freeVisibility();
+}
 
-void executeVisibilityTreeSync();
+void freeVisibility() {
+    freeJobTree(&visibilityTreeExit);
+}
