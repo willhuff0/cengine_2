@@ -23,6 +23,9 @@ void initEngine() {
     initInput();
     initFramePackets();
 
+    initSim();
+    initRenderer();
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
@@ -33,6 +36,9 @@ void initEngine() {
     printEngineInfo();
 }
 void freeEngine() {
+    freeRenderer();
+    freeSim();
+
     freeFramePackets();
     freeInput();
     freeWindow();

@@ -112,12 +112,12 @@ build CMakeFiles/cengine_2.dir/src/simulation/sim_object.c.obj: C_COMPILER__ceng
   OBJECT_DIR = CMakeFiles\cengine_2.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine_2.dir\src\simulation
 
-build CMakeFiles/cengine_2.dir/src/renderer/visibility_object.c.obj: C_COMPILER__cengine_2_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine_2/src/renderer/visibility_object.c || cmake_object_order_depends_target_cengine_2
-  DEP_FILE = CMakeFiles\cengine_2.dir\src\renderer\visibility_object.c.obj.d
+build CMakeFiles/cengine_2.dir/src/renderer/visibility/visibility_object.c.obj: C_COMPILER__cengine_2_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine_2/src/renderer/visibility/visibility_object.c || cmake_object_order_depends_target_cengine_2
+  DEP_FILE = CMakeFiles\cengine_2.dir\src\renderer\visibility\visibility_object.c.obj.d
   FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine_2/include -IC:/Users/wehuf/CLionProjects/cengine_2/include/angle
   OBJECT_DIR = CMakeFiles\cengine_2.dir
-  OBJECT_FILE_DIR = CMakeFiles\cengine_2.dir\src\renderer
+  OBJECT_FILE_DIR = CMakeFiles\cengine_2.dir\src\renderer\visibility
 
 build CMakeFiles/cengine_2.dir/src/engine/window.c.obj: C_COMPILER__cengine_2_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine_2/src/engine/window.c || cmake_object_order_depends_target_cengine_2
   DEP_FILE = CMakeFiles\cengine_2.dir\src\engine\window.c.obj.d
@@ -189,6 +189,13 @@ build CMakeFiles/cengine_2.dir/src/simulation/frame_packet_generator.c.obj: C_CO
   OBJECT_DIR = CMakeFiles\cengine_2.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine_2.dir\src\simulation
 
+build CMakeFiles/cengine_2.dir/src/renderer/visibility/visibility.c.obj: C_COMPILER__cengine_2_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine_2/src/renderer/visibility/visibility.c || cmake_object_order_depends_target_cengine_2
+  DEP_FILE = CMakeFiles\cengine_2.dir\src\renderer\visibility\visibility.c.obj.d
+  FLAGS = -g -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine_2/include -IC:/Users/wehuf/CLionProjects/cengine_2/include/angle
+  OBJECT_DIR = CMakeFiles\cengine_2.dir
+  OBJECT_FILE_DIR = CMakeFiles\cengine_2.dir\src\renderer\visibility
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target cengine_2
@@ -197,7 +204,7 @@ build CMakeFiles/cengine_2.dir/src/simulation/frame_packet_generator.c.obj: C_CO
 #############################################
 # Link the executable cengine_2.exe
 
-build cengine_2.exe: C_EXECUTABLE_LINKER__cengine_2_Debug CMakeFiles/cengine_2.dir/main.c.obj CMakeFiles/cengine_2.dir/src/jobs/job.c.obj CMakeFiles/cengine_2.dir/src/jobs/job_system.c.obj CMakeFiles/cengine_2.dir/src/jobs/job_worker.c.obj CMakeFiles/cengine_2.dir/src/stb_impl.c.obj CMakeFiles/cengine_2.dir/src/stbi_impl.c.obj CMakeFiles/cengine_2.dir/src/renderer/frame_packet.c.obj CMakeFiles/cengine_2.dir/src/renderer/render_object.c.obj CMakeFiles/cengine_2.dir/src/simulation/sim_object.c.obj CMakeFiles/cengine_2.dir/src/renderer/visibility_object.c.obj CMakeFiles/cengine_2.dir/src/engine/window.c.obj CMakeFiles/cengine_2.dir/src/common.c.obj CMakeFiles/cengine_2.dir/src/engine/engine.c.obj CMakeFiles/cengine_2.dir/src/simulation/sim.c.obj CMakeFiles/cengine_2.dir/src/engine/input.c.obj CMakeFiles/cengine_2.dir/src/simulation/network/network.c.obj CMakeFiles/cengine_2.dir/src/simulation/physics/physics.c.obj CMakeFiles/cengine_2.dir/src/simulation/logic/logic.c.obj CMakeFiles/cengine_2.dir/src/renderer/renderer.c.obj CMakeFiles/cengine_2.dir/src/simulation/frame_packet_generator.c.obj | C$:/Users/wehuf/CLionProjects/cengine_2/libs/libglfw3.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libGLESv2.lib C$:/Users/wehuf/CLionProjects/cengine_2/libs/libEGL.lib C$:/Users/wehuf/CLionProjects/cengine_2/libs/libassimp.dll.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libcglm.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libode_single.dll.a
+build cengine_2.exe: C_EXECUTABLE_LINKER__cengine_2_Debug CMakeFiles/cengine_2.dir/main.c.obj CMakeFiles/cengine_2.dir/src/jobs/job.c.obj CMakeFiles/cengine_2.dir/src/jobs/job_system.c.obj CMakeFiles/cengine_2.dir/src/jobs/job_worker.c.obj CMakeFiles/cengine_2.dir/src/stb_impl.c.obj CMakeFiles/cengine_2.dir/src/stbi_impl.c.obj CMakeFiles/cengine_2.dir/src/renderer/frame_packet.c.obj CMakeFiles/cengine_2.dir/src/renderer/render_object.c.obj CMakeFiles/cengine_2.dir/src/simulation/sim_object.c.obj CMakeFiles/cengine_2.dir/src/renderer/visibility/visibility_object.c.obj CMakeFiles/cengine_2.dir/src/engine/window.c.obj CMakeFiles/cengine_2.dir/src/common.c.obj CMakeFiles/cengine_2.dir/src/engine/engine.c.obj CMakeFiles/cengine_2.dir/src/simulation/sim.c.obj CMakeFiles/cengine_2.dir/src/engine/input.c.obj CMakeFiles/cengine_2.dir/src/simulation/network/network.c.obj CMakeFiles/cengine_2.dir/src/simulation/physics/physics.c.obj CMakeFiles/cengine_2.dir/src/simulation/logic/logic.c.obj CMakeFiles/cengine_2.dir/src/renderer/renderer.c.obj CMakeFiles/cengine_2.dir/src/simulation/frame_packet_generator.c.obj CMakeFiles/cengine_2.dir/src/renderer/visibility/visibility.c.obj | C$:/Users/wehuf/CLionProjects/cengine_2/libs/libglfw3.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libGLESv2.lib C$:/Users/wehuf/CLionProjects/cengine_2/libs/libEGL.lib C$:/Users/wehuf/CLionProjects/cengine_2/libs/libassimp.dll.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libcglm.a C$:/Users/wehuf/CLionProjects/cengine_2/libs/libode_single.dll.a
   FLAGS = -g -g
   LINK_FLAGS = -static-libgcc -static-libstdc++ -static
   LINK_LIBRARIES = C:/Users/wehuf/CLionProjects/cengine_2/libs/libglfw3.a  C:/Users/wehuf/CLionProjects/cengine_2/libs/libGLESv2.lib  C:/Users/wehuf/CLionProjects/cengine_2/libs/libEGL.lib  C:/Users/wehuf/CLionProjects/cengine_2/libs/libassimp.dll.a  C:/Users/wehuf/CLionProjects/cengine_2/libs/libcglm.a  C:/Users/wehuf/CLionProjects/cengine_2/libs/libode_single.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32

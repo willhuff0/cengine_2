@@ -4,10 +4,16 @@
 
 #include "renderer.h"
 
+#include "visibility/visibility.h"
+
 Job renderTreeExit;
 
-void initRenderer() {}
+void initRenderer() {
+    initVisibility();
+}
 void freeRenderer() {
+    freeVisibility();
+
     freeJobTree(&renderTreeExit);
 }
 
