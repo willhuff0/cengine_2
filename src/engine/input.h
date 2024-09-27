@@ -9,25 +9,6 @@
 
 #include "../common.h"
 
-typedef struct {
-    int key;
-} MapEntry;
-
-typedef struct {
-    MapEntry* keysDown;
-    MapEntry* keysHeld;
-    MapEntry* keysUp;
-
-    MapEntry* mouseButtonsDown;
-    MapEntry* mouseButtonsHeld;
-    MapEntry* mouseButtonsUp;
-
-    double mouseDeltaX;
-    double mouseDeltaY;
-} InputState;
-
-extern InputState simInputState;
-
 void initInput();
 void freeInput();
 
@@ -36,8 +17,20 @@ void inputMouseButtonCallback(GLFWwindow* window, int button, int action, int mo
 void inputMousePosCallback(GLFWwindow* window, double xpos, double ypos);
 
 void inputBeforePoll();
-void inputAfterPoll();
 
-void inputSimStartTick();
+// Thread safety: can be called from any thread (only reads)
+
+bool isKeyDown(int key);
+bool isKeyHeld(int key);
+bool isKeyUp(int key);
+
+bool isMouseButtonDown(int button);
+bool isMouseButtonHeld(int button);
+bool isMouseButtonUp(int button);
+
+double getMouseDeltaX();
+double getMouseDeltaY();
+
+//
 
 #endif //INPUT_H

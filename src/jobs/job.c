@@ -34,3 +34,11 @@ void resetJobTree(Job* exit) {
 
     exit->done = false;
 }
+
+void waitForJobToFinish(const Job* job) {
+    while (true) {
+        pthread_mutex_lock(job->mutex);
+        if (job->done) break;
+        pthread_mutex_unlock(job->mutex);
+    }
+}

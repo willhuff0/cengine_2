@@ -47,17 +47,13 @@ void freeJobSystem() {
     pthread_mutex_destroy(&jobSystemMutex);
 }
 
-void pushJobTree(const Job* exit) {
+void executeJobTreeAsync(const Job* exit) {
     arrput(trees, exit);
 }
 
-void executeJobTree(const Job* exit) {
-    pushJobTree(exit);
-    while (true) {
-        pthread_mutex_lock(exit->mutex);
-        if (exit->done) break;
-        pthread_mutex_unlock(exit->mutex);
-    }
+void executeJobTreeSync(const Job* exit) {
+    executeJobTreeAsync(exit);
+    waitForJobToFinish(exit);
 }
 
 // Returns nullptr if job itself or all deps are in progress

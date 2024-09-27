@@ -8,6 +8,9 @@
 
 #include "input.h"
 #include "window.h"
+#include "../renderer/frame_packet.h"
+#include "../renderer/renderer.h"
+#include "../simulation/sim.h"
 
 static void printEngineInfo() {
     printf("GLFW version:   %s\n", windowGetGLFWVersionString());
@@ -18,6 +21,7 @@ static void printEngineInfo() {
 void initEngine() {
     initWindow();
     initInput();
+    initFramePackets();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -29,17 +33,37 @@ void initEngine() {
     printEngineInfo();
 }
 void freeEngine() {
+    freeFramePackets();
     freeInput();
     freeWindow();
 }
 
 void engineLoop() {
     while (!windowShouldClose()) {
+        // Render previous render packet (if available)
+        // Run renderer in parallel
+        executeRenderTreeAsync();
 
+        // Poll Events
         inputBeforePoll();
         windowPollEvents();
-        inputAfterPoll();
 
+        // Run simulation in parallel
+        executeSimTreeAsync();
+
+        // Wait for renderer to finish
+        waitForJobToFinish(&renderTreeExit);
+
+        // Execute draw queue
+        // TODO: EXECUTE DRAW COMMANDS
+
+        // Present drawn frame
         windowSwapBuffers();
+
+        // Wait for simulation to finish
+        waitForJobToFinish(&simTreeExit);
+
+        // Swap frame packets
+        swapFramePackets();
     }
 }

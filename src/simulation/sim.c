@@ -5,20 +5,14 @@
 #include "sim.h"
 
 #include "../engine/input.h"
-#include "../jobs/jobs.h"
 #include "../renderer/renderer.h"
 #include "logic/logic.h"
 #include "network/network.h"
 #include "physics/physics.h"
 
-static Job simTreeExit;
+Job simTreeExit;
 
 void initSim() {
-    Job inputJob;
-    {
-        initJob(&inputJob, NULL, inputSimStartTick, "[JOB: (Sim) Input]");
-    }
-
     Job networkPollJob;
     {
         initJob(&networkPollJob, NULL, networkPoll, "[JOB: (Sim) Network Poll");
@@ -35,36 +29,27 @@ void initSim() {
     Job logicExecutionJob;
     {
         Job* logicJobDeps = NULL;
-        arrput(logicJobDeps, inputJob);
         arrput(logicJobDeps, physicsTickJob);
 
         initJob(&logicExecutionJob, logicJobDeps, logicExecution, "[JOB: (Sim) Logic Execution");
     }
 
-    Job cloneRenderDataJob;
+    Job createFramePacketJob;
     {
         Job* cloneRenderDataDeps = NULL;
         arrput(cloneRenderDataDeps, logicExecutionJob);
 
-        initJob(&cloneRenderDataJob, cloneRenderDataDeps, NULL, "[JOB: (Sim) Clone Render Data");
+        initJob(&createFramePacketJob, cloneRenderDataDeps, NULL, "[JOB: (Sim) Create Frame Packet");
     }
 
-    Job renderFrameJob;
-    {
-        Job* renderFrameJobDeps = NULL;
-        arrput(renderFrameJobDeps, cloneRenderDataJob);
-
-        initJob(&renderFrameJob, renderFrameJobDeps, executeRenderTree, "[JOB: (Sim) Render Frame");
-    }
-
-    simTreeExit = renderFrameJob;
+    simTreeExit = createFramePacketJob;
 }
 
 void freeSim() {
     freeJobTree(&simTreeExit);
 }
 
-void executeSimTree() {
+void executeSimTreeAsync() {
     resetJobTree(&simTreeExit);
-    executeJobTree(&simTreeExit);
+    executeJobTreeAsync(&simTreeExit);
 }

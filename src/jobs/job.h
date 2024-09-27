@@ -26,4 +26,6 @@ void freeJobTree(Job* exit);
 
 void resetJobTree(Job* exit);
 
+void waitForJobToFinish(const Job* job);
+
 #endif //JOB_H

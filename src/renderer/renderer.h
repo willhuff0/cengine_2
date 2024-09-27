@@ -5,9 +5,13 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include "../jobs/jobs.h"
+
+extern Job renderTreeExit;
+
 void initRenderer();
 void freeRenderer();
 
-void executeRenderTree();
+void executeRenderTreeAsync();
 
 #endif //RENDERER_H

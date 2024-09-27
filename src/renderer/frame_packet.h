@@ -5,8 +5,18 @@
 #ifndef FRAME_PACKET_H
 #define FRAME_PACKET_H
 
-typedef struct {
+#include "../common.h"
 
+typedef struct {
+    vec3 pos;
 } FramePacket;
+
+extern FramePacket* rendererFramePacket;
+extern FramePacket* simFramePacket;
+
+void initFramePackets();
+void freeFramePackets();
+
+void swapFramePackets();
 
 #endif //FRAME_PACKET_H

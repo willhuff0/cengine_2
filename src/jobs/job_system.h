@@ -15,8 +15,8 @@ extern bool jobSystemShouldShutdown;
 void initJobSystem(int numThreads);
 void freeJobSystem();
 
-void pushJobTree(const Job* exit);
-void executeJobTree(const Job* exit);
+void executeJobTreeAsync(const Job* exit);
+void executeJobTreeSync(const Job* exit);
 
 // Gets the next job to execute and acquires a mutex lock. If there are no jobs to execute, returns nullptr.
 // Should only be called from worker threads.

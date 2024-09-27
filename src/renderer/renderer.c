@@ -7,10 +7,12 @@
 #include <stdio.h>
 #include <unistd.h>
 
+Job renderTreeExit;
+
 void initRenderer() {}
 void freeRenderer() {}
 
-void executeRenderTree() {
+void executeRenderTreeAsync() {
     printf("executeRenderTree start\n");
     sleep(3);
     printf("executeRenderTree done\n");
