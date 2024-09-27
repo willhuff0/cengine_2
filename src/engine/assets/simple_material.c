@@ -3,3 +3,11 @@
 //
 
 #include "simple_material.h"
+
+SimpleMaterialID createSimpleMaterial(ShaderID shader, vec4 color);
+
+void freeSimpleMaterial(const SimpleMaterial* simpleMaterial);
+
+SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id);
+
+void bindSimpleMaterial(const SimpleMaterialID id);
