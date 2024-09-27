@@ -46,7 +46,9 @@ add_executable(cengine_2 main.c
         src/simulation/frame_packet_generator.c
         src/simulation/frame_packet_generator.h
         src/renderer/visibility/visibility.c
-        src/renderer/visibility/visibility.h)
+        src/renderer/visibility/visibility.h
+        src/engine/assets.c
+        src/engine/assets.h)
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 
