@@ -4,6 +4,7 @@
 
 #include "sim.h"
 
+#include "frame_packet_generator.h"
 #include "../engine/input.h"
 #include "../renderer/renderer.h"
 #include "logic/logic.h"
@@ -36,10 +37,10 @@ void initSim() {
 
     Job createFramePacketJob;
     {
-        Job* cloneRenderDataDeps = NULL;
-        arrput(cloneRenderDataDeps, logicExecutionJob);
+        Job* createFramePacketDeps = NULL;
+        arrput(createFramePacketDeps, logicExecutionJob);
 
-        initJob(&createFramePacketJob, cloneRenderDataDeps, NULL, "[JOB: (Sim) Create Frame Packet");
+        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, "[JOB: (Sim) Create Frame Packet");
     }
 
     simTreeExit = createFramePacketJob;

@@ -4,16 +4,14 @@
 
 #include "renderer.h"
 
-#include <stdio.h>
-#include <unistd.h>
-
 Job renderTreeExit;
 
 void initRenderer() {}
-void freeRenderer() {}
+void freeRenderer() {
+    freeJobTree(&renderTreeExit);
+}
 
 void executeRenderTreeAsync() {
-    printf("executeRenderTree start\n");
-    sleep(3);
-    printf("executeRenderTree done\n");
+    resetJobTree(&renderTreeExit);
+    executeJobTreeAsync(&renderTreeExit);
 }

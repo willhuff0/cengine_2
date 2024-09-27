@@ -42,7 +42,9 @@ add_executable(cengine_2 main.c
         src/simulation/logic/logic.c
         src/simulation/logic/logic.h
         src/renderer/renderer.c
-        src/renderer/renderer.h)
+        src/renderer/renderer.h
+        src/simulation/frame_packet_generator.c
+        src/simulation/frame_packet_generator.h)
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 
