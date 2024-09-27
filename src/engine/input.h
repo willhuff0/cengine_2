@@ -26,8 +26,6 @@ typedef struct {
     double mouseDeltaY;
 } InputState;
 
-extern pthread_mutex_t inputMutex;
-
 extern InputState simInputState;
 
 void initInput();

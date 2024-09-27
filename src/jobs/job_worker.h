@@ -11,7 +11,7 @@ typedef struct {
     pthread_t thread;
 } Worker;
 
-void initWorker(Worker* worker, const char* name = NULL);
+void initWorker(Worker* worker, const char* name);
 void freeWorker(Worker* worker);
 
 #endif //JOB_WORKER_H

@@ -24,7 +24,9 @@ void initJobSystem(int numThreads) {
 
     workers = malloc(sizeof(Worker) * numWorkers);
     for (int i = 0; i < numWorkers; i++) {
-        initWorker(&workers[i]);
+        char buffer[24];
+        snprintf(buffer, 24, "Worker %d", i);
+        initWorker(&workers[i], buffer);
     }
 
     trees = NULL;

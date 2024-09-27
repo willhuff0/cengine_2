@@ -4,7 +4,7 @@
 
 #include "job.h"
 
-void initJob(Job* job, int id, Job* deps, void (*execute)(), const char* name = NULL) {
+void initJob(Job* job, Job* deps, void (*execute)(), const char* name) {
     job->name = name;
     job->mutex = malloc(sizeof(pthread_mutex_t));
     pthread_mutex_init(job->mutex, NULL);

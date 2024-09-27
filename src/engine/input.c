@@ -9,7 +9,7 @@
 
 #include "window.h"
 
-pthread_mutex_t inputMutex;
+static pthread_mutex_t inputMutex;
 
 static InputState mainState;
 InputState simInputState;

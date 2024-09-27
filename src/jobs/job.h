@@ -19,7 +19,7 @@ struct Job {
     bool done;
 };
 
-void initJob(Job* job, Job* deps, void (*execute)(), const char* name = NULL);
+void initJob(Job* job, Job* deps, void (*execute)(), const char* name);
 void freeJob(Job* job);
 
 void freeJobTree(Job* exit);
