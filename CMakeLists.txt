@@ -48,7 +48,11 @@ add_executable(cengine_2 main.c
         src/renderer/visibility/visibility.c
         src/renderer/visibility/visibility.h
         src/engine/assets.c
-        src/engine/assets.h)
+        src/engine/assets.h
+        src/engine/assets/texture.c
+        src/engine/assets/texture.h
+        src/engine/assets/shader.c
+        src/engine/assets/shader.h)
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 

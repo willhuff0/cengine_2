@@ -5,9 +5,13 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
-typedef struct {
+#include "assets/texture.h"
 
+typedef struct {
+    Texture* textures;
 } Assets;
+
+extern Assets assets;
 
 void initAssets();
 void freeAssets();

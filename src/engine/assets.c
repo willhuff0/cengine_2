@@ -3,3 +3,12 @@
 //
 
 #include "assets.h"
+
+Assets assets;
+
+void initAssets() {
+    assets.textures = NULL;
+}
+void freeAssets() {
+    arrfree(assets.textures);
+}
