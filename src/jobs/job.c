@@ -4,16 +4,18 @@
 
 #include "job.h"
 
-void initJob(Job* job, int id, Job* deps, void (*execute)()) {
-    job->id = id;
-    pthread_mutex_init(&job->mutex, NULL);
+void initJob(Job* job, int id, Job* deps, void (*execute)(), const char* name = NULL) {
+    job->name = name;
+    job->mutex = malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(job->mutex, NULL);
     job->deps = deps;
     job->execute = execute;
     job->done = false;
 }
 
 void freeJob(Job* job) {
-    pthread_mutex_destroy(&job->mutex);
+    pthread_mutex_destroy(job->mutex);
+    free(job->mutex);
     arrfree(job->deps);
 }
 
@@ -23,4 +25,12 @@ void freeJobTree(Job* exit) {
     }
 
     freeJob(exit);
+}
+
+void resetJobTree(Job* exit) {
+    for (int i = 0; i < arrlen(exit->deps); ++i) {
+        resetJobTree(&exit->deps[i]);
+    }
+
+    exit->done = false;
 }

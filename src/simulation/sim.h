@@ -2,12 +2,12 @@
 // Created by wehuf on 9/26/2024.
 //
 
-#ifndef SIMULATION_H
-#define SIMULATION_H
+#ifndef SIM_H
+#define SIM_H
 
 void initSim();
 void freeSim();
 
-void simTick();
+void executeSimTree();
 
-#endif //SIMULATION_H
+#endif //SIM_H

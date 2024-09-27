@@ -17,7 +17,32 @@ add_executable(cengine_2 main.c
         src/jobs/job_worker.c
         src/jobs/job_worker.h
         src/stb_impl.c
-        src/stbi_impl.c)
+        src/stbi_impl.c
+        src/renderer/frame_packet.c
+        src/renderer/frame_packet.h
+        src/renderer/render_object.c
+        src/renderer/render_object.h
+        src/simulation/sim_object.c
+        src/simulation/sim_object.h
+        src/renderer/visibility_object.c
+        src/renderer/visibility_object.h
+        src/engine/window.c
+        src/engine/window.h
+        src/common.c
+        src/engine/engine.c
+        src/engine/engine.h
+        src/simulation/sim.c
+        src/simulation/sim.h
+        src/engine/input.c
+        src/engine/input.h
+        src/simulation/network/network.c
+        src/simulation/network/network.h
+        src/simulation/physics/physics.c
+        src/simulation/physics/physics.h
+        src/simulation/logic/logic.c
+        src/simulation/logic/logic.h
+        src/renderer/renderer.c
+        src/renderer/renderer.h)
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 

@@ -12,16 +12,18 @@
 typedef struct Job Job;
 
 struct Job {
-    int id;
-    pthread_mutex_t mutex;
+    const char* name;
+    pthread_mutex_t* mutex;
     Job* deps;
     void (*execute)();
     bool done;
 };
 
-void initJob(Job* job, int id, Job* deps, void (*execute)());
+void initJob(Job* job, Job* deps, void (*execute)(), const char* name = NULL);
 void freeJob(Job* job);
 
 void freeJobTree(Job* exit);
+
+void resetJobTree(Job* exit);
 
 #endif //JOB_H

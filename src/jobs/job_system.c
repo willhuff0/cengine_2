@@ -45,13 +45,22 @@ void freeJobSystem() {
     pthread_mutex_destroy(&jobSystemMutex);
 }
 
-void addJobTree(Job* exit) {
+void pushJobTree(const Job* exit) {
     arrput(trees, exit);
+}
+
+void executeJobTree(const Job* exit) {
+    pushJobTree(exit);
+    while (true) {
+        pthread_mutex_lock(exit->mutex);
+        if (exit->done) break;
+        pthread_mutex_unlock(exit->mutex);
+    }
 }
 
 // Returns nullptr if job itself or all deps are in progress
 static Job* findIncompleteJob(Job* job) {
-    if (pthread_mutex_trylock(&job->mutex) != 0) return NULL; // job is already in progress
+    if (pthread_mutex_trylock(job->mutex) != 0) return NULL; // job is already in progress
     if (job->done) return job;
 
     bool depInProgress = false;
@@ -63,16 +72,16 @@ static Job* findIncompleteJob(Job* job) {
             continue;
         }
         if (result->done) {
-            pthread_mutex_unlock(&result->mutex);
+            pthread_mutex_unlock(result->mutex);
             continue;
         }
 
-        pthread_mutex_unlock(&job->mutex);
+        pthread_mutex_unlock(job->mutex);
         return result;
     }
 
     if (depInProgress) {
-        pthread_mutex_unlock(&job->mutex);
+        pthread_mutex_unlock(job->mutex);
         return NULL;
     }
 
@@ -82,12 +91,16 @@ static Job* findIncompleteJob(Job* job) {
 // Gets the next job to execute and acquires a mutex lock. If there are no jobs to execute, returns nullptr.
 // Should only be called from worker threads.
 Job* getNextJob() {
-    for (int i = 0; i < arrlen(trees); i++) {
-        if (trees[i]->done) {
-            // TREE IS DONE GET IT OUT OF HERE
-            continue;
-        }
+    if (trees == NULL) return NULL;
 
+    // Delete all job trees from list that are done
+    for (int i = arrlen(trees) - 1; i >= 0; --i) {
+        if (trees[i]->done) {
+            arrdel(trees, i);
+        }
+    }
+
+    for (int i = 0; i < arrlen(trees); i++) {
         Job* next = findIncompleteJob(trees[i]);
         if (next != NULL) return next;
     }
