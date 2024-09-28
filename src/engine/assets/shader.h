@@ -6,6 +6,12 @@
 #define SHADER_H
 
 #include "../../common.h"
+#include "../../paths.h"
+
+#define SHADER_DIR ASSETS_DIR "shaders" DIR
+
+#define SHADER_SIMPLE                    SHADER_DIR "simple.vert",           SHADER_DIR "simple.frag"
+#define DEFAULT_SHADER_UBER              SHADER_DIR "uber.vert",             SHADER_DIR "uber.frag"
 
 typedef int ShaderID;
 
