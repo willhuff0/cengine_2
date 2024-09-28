@@ -23,25 +23,36 @@ typedef union {
 
 struct Job {
     const char* name;
-    pthread_mutex_t* mutex;
     Job* deps;
     void (*execute)(JobData data);
     JobData data;
+
+    // Should only be set if parent jobTree is mutex locked
     bool done;
-    bool locked;
+    bool inProgress;
 };
 
+typedef struct {
+    const char* name;
+    pthread_mutex_t* mutex;
+    Job* jobs;
+    bool done;
+
+    // Debug
+    bool locked;
+} JobTree;
+
 void initJob(Job* job, Job* deps, void (*execute)(JobData data), const JobData data, const char* name);
-void freeJob(Job* job);
+void freeJobAndDeps(Job* job);
 
-void freeJobTree(Job* exit);
+void initJobTree(JobTree* jobTree, Job* jobs, const char* name);
+void freeJobTree(JobTree* jobTree);
+// Locks job tree for the caller
+void resetJobTree(JobTree* jobTree);
 
-void resetJobTree(Job* exit);
+void waitForJobTreeToFinish(JobTree* jobTree);
 
-void waitForJobToFinish(const Job* job);
-
-void lockJob(Job* job);
-bool tryLockJob(Job* job);
-void unlockJob(Job* job);
+void lockJobTree(JobTree* jobTree);
+void unlockJobTree(JobTree* jobTree);
 
 #endif //JOB_H

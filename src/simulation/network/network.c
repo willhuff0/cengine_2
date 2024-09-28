@@ -7,5 +7,5 @@
 #include <stdio.h>
 
 void networkPoll() {
-    printf("networkPoll\n");
+
 }

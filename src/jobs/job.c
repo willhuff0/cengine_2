@@ -6,59 +6,73 @@
 
 void initJob(Job* job, Job* deps, void (*execute)(JobData data), const JobData data, const char* name) {
     job->name = name;
-    job->mutex = malloc(sizeof(pthread_mutex_t));
-    pthread_mutex_init(job->mutex, NULL);
     job->deps = deps;
     job->execute = execute;
     job->data = data;
     job->done = false;
-    job->locked = false;
+    job->inProgress = false;
 }
 
-void freeJob(Job* job) {
-    pthread_mutex_destroy(job->mutex);
-    free(job->mutex);
+void freeJobAndDeps(Job* job) {
+    for (int i = 0; i < arrlen(job->deps); ++i) {
+        freeJobAndDeps(&job->deps[i]);
+    }
+
     arrfree(job->deps);
 }
-
-void freeJobTree(Job* exit) {
-    for (int i = 0; i < arrlen(exit->deps); ++i) {
-        freeJobTree(&exit->deps[i]);
+static void resetJobAndDeps(Job* job) {
+    for (int i = 0; i < arrlen(job->deps); ++i) {
+        resetJobAndDeps(&job->deps[i]);
     }
 
-    freeJob(exit);
+    job->done = false;
+    job->inProgress = false;
 }
 
-void resetJobTree(Job* exit) {
-    for (int i = 0; i < arrlen(exit->deps); ++i) {
-        resetJobTree(&exit->deps[i]);
+void initJobTree(JobTree* jobTree, Job* jobs, const char* name) {
+    jobTree->name = name;
+    jobTree->mutex = malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(jobTree->mutex, NULL);
+    jobTree->jobs = jobs;
+}
+void freeJobTree(JobTree* jobTree) {
+    pthread_mutex_destroy(jobTree->mutex);
+    free(jobTree->mutex);
+
+    for (int i = 0; i < arrlen(jobTree->jobs); ++i) {
+        freeJobAndDeps(&jobTree->jobs[i]);
     }
 
-    exit->done = false;
+    arrfree(jobTree->jobs);
+}
+void resetJobTree(JobTree* jobTree) {
+    lockJobTree(jobTree);
+
+    for (int i = 0; i < arrlen(jobTree->jobs); ++i) {
+        resetJobAndDeps(&jobTree->jobs[i]);
+    }
+
+    jobTree->done = false;
+
+    unlockJobTree(jobTree);
 }
 
-void waitForJobToFinish(const Job* job) {
+void waitForJobTreeToFinish(JobTree* jobTree) {
     while (true) {
-        if (pthread_mutex_trylock(job->mutex) == 0) {
-            if (job->done) break;
-            pthread_mutex_unlock(job->mutex);
+        lockJobTree(jobTree);
+        if (jobTree->done) {
+            unlockJobTree(jobTree);
+            break;
         }
+        unlockJobTree(jobTree);
     }
 }
 
-void lockJob(Job* job) {
-    pthread_mutex_lock(job->mutex);
-    job->locked = true;
+void lockJobTree(JobTree* jobTree) {
+    pthread_mutex_lock(jobTree->mutex);
+    jobTree->locked = true;
 }
-bool tryLockJob(Job* job) {
-    if (pthread_mutex_trylock(job->mutex) == 0) {
-        job->locked = true;
-        return true;
-    }
-
-    return false;
-}
-void unlockJob(Job* job) {
-    job->locked = false;
-    pthread_mutex_unlock(job->mutex);
+void unlockJobTree(JobTree* jobTree) {
+    jobTree->locked = false;
+    pthread_mutex_unlock(jobTree->mutex);
 }

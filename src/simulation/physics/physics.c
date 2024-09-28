@@ -7,5 +7,5 @@
 #include <stdio.h>
 
 void executePhysicsTree() {
-    printf("executePhysicsTree\n");
+
 }

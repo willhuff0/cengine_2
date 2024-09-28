@@ -7,5 +7,5 @@
 #include <stdio.h>
 
 void logicExecution() {
-    printf("logicExecution\n");
+
 }

@@ -8,7 +8,7 @@
 #include "renderer_object.h"
 #include "../engine/draw_system.h"
 
-Job renderTreeExit;
+JobTree renderTree;
 
 static Job iterateObjectsJob;
 static Job buildOpaqueDrawQueueJob;
@@ -62,8 +62,7 @@ static void processTransparentRenderObject(const ProcessRendererObjectInstructio
 // Creates jobs (deps for sort transparents and build opaque draw queue)
 static void iterateVisibleObjects() {
     // Prevent workers from starting jobs before the buffers are allocated
-    lockJob(&buildOpaqueDrawQueueJob);
-    lockJob(&buildTransparentsDrawQueueJob);
+    lockJobTree(&renderTree);
 
     numOpaqueRendererObjects = 0;
     numTransparentRendererObjects = 0;
@@ -103,8 +102,7 @@ static void iterateVisibleObjects() {
     uberMaterialOffset = arrlen(assets.simpleMaterials);
 
     // Allow workers to start working on jobs and access buffers
-    unlockJob(&buildOpaqueDrawQueueJob);
-    unlockJob(&buildTransparentsDrawQueueJob);
+    unlockJobTree(&renderTree);
 }
 
 static int compareOpaqueRendererObjectsByMaterialThenShaderThenMesh(const ProcessedOpaqueRendererObject* a, const ProcessedOpaqueRendererObject* b) {
@@ -304,7 +302,7 @@ static void buildTransparentsDrawQueue() {
 static void mergeDrawQueues() {
     if (arrlen(buildOpaqueDrawQueueJob.deps) > 1) {
         for (int i = 1; i < arrlen(buildOpaqueDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildOpaqueDrawQueueJob.deps[i]);
+            freeJobAndDeps(&buildOpaqueDrawQueueJob.deps[i]);
         }
         arrfree(buildOpaqueDrawQueueJob.deps);
         buildOpaqueDrawQueueJob.deps = NULL;
@@ -313,7 +311,7 @@ static void mergeDrawQueues() {
 
     if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
         for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildTransparentsDrawQueueJob.deps[i]);
+            freeJobAndDeps(&buildTransparentsDrawQueueJob.deps[i]);
         }
         arrfree(buildTransparentsDrawQueueJob.deps);
         buildTransparentsDrawQueueJob.deps = NULL;
@@ -349,21 +347,21 @@ void initRenderer() {
     initRendererObjects();
 
     {
-        initJob(&iterateObjectsJob, NULL, iterateVisibleObjects, (JobData){ NULL }, "[RENDERER] Iterate Objects");
+        initJob(&iterateObjectsJob, NULL, iterateVisibleObjects, (JobData){ NULL }, "Iterate Objects");
     }
 
     {
         Job* buildOpaqueDrawQueueDeps = NULL;
         arrput(buildOpaqueDrawQueueDeps, iterateObjectsJob);
 
-        initJob(&buildOpaqueDrawQueueJob, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, (JobData){ NULL }, "[RENDERER] Build Opaque Draw Queue");
+        initJob(&buildOpaqueDrawQueueJob, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, (JobData){ NULL }, "Build Opaque Draw Queue");
     }
 
     {
         Job* buildTransparentsDrawQueueDeps = NULL;
         arrput(buildTransparentsDrawQueueDeps, iterateObjectsJob);
 
-        initJob(&buildTransparentsDrawQueueJob, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, (JobData){ NULL }, "[RENDERER] Build Transparents Draw Queue");
+        initJob(&buildTransparentsDrawQueueJob, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, (JobData){ NULL }, "Build Transparents Draw Queue");
     }
 
     Job mergeDrawQueuesJob;
@@ -372,21 +370,24 @@ void initRenderer() {
         arrput(mergeDrawQueuesDeps, buildOpaqueDrawQueueJob);
         arrput(mergeDrawQueuesDeps, buildTransparentsDrawQueueJob);
 
-        initJob(&mergeDrawQueuesJob, mergeDrawQueuesDeps, mergeDrawQueues, (JobData){ NULL }, "[RENDERER] Merge Draw Queues");
+        initJob(&mergeDrawQueuesJob, mergeDrawQueuesDeps, mergeDrawQueues, (JobData){ NULL }, "Merge Draw Queues");
     }
 
-    renderTreeExit = mergeDrawQueuesJob;
+    Job* renderTreeJobs = NULL;
+    arrput(renderTreeJobs, mergeDrawQueuesJob);
+
+    initJobTree(&renderTree, renderTreeJobs, "Renderer");
 }
 
 void freeRenderer() {
     freeRendererObjects();
-    freeJobTree(&renderTreeExit);
+    freeJobTree(&renderTree);
 }
 
 void executeRenderTreeAsync() {
     if (arrlen(buildOpaqueDrawQueueJob.deps) > 1) {
         for (int i = 1; i < arrlen(buildOpaqueDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildOpaqueDrawQueueJob.deps[i]);
+            freeJobAndDeps(&buildOpaqueDrawQueueJob.deps[i]);
         }
         arrfree(buildOpaqueDrawQueueJob.deps);
         buildOpaqueDrawQueueJob.deps = NULL;
@@ -395,13 +396,13 @@ void executeRenderTreeAsync() {
 
     if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
         for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildTransparentsDrawQueueJob.deps[i]);
+            freeJobAndDeps(&buildTransparentsDrawQueueJob.deps[i]);
         }
         arrfree(buildTransparentsDrawQueueJob.deps);
         buildTransparentsDrawQueueJob.deps = NULL;
         arrput(buildTransparentsDrawQueueJob.deps, iterateObjectsJob);
     }
 
-    resetJobTree(&renderTreeExit);
-    executeJobTreeAsync(&renderTreeExit);
+    resetJobTree(&renderTree);
+    executeJobTreeAsync(&renderTree);
 }

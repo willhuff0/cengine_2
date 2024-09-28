@@ -7,7 +7,7 @@
 
 #include "../jobs/jobs.h"
 
-extern Job simTreeExit;
+extern JobTree simTree;
 
 void initSim();
 void freeSim();

@@ -59,6 +59,8 @@ add_executable(cengine_2 main.c
         src/renderer/renderer_object.h
         src/engine/draw_system.c
         src/engine/draw_system.h
+        src/engine/utils/fps_counter.c
+        src/engine/utils/fps_counter.h
 )
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)

@@ -11,12 +11,12 @@
 #include "network/network.h"
 #include "physics/physics.h"
 
-Job simTreeExit;
+JobTree simTree;
 
 void initSim() {
     Job networkPollJob;
     {
-        initJob(&networkPollJob, NULL, networkPoll, (JobData){ NULL }, "[Sim] Network Poll");
+        initJob(&networkPollJob, NULL, networkPoll, (JobData){ NULL }, "Network Poll");
     }
 
     Job physicsTickJob;
@@ -24,7 +24,7 @@ void initSim() {
         Job* physicsTickJobDeps = NULL;
         arrput(physicsTickJobDeps, networkPollJob);
 
-        initJob(&physicsTickJob, physicsTickJobDeps, executePhysicsTree, (JobData){ NULL }, "[Sim] Physics Tick");
+        initJob(&physicsTickJob, physicsTickJobDeps, executePhysicsTree, (JobData){ NULL }, "Physics Tick");
     }
 
     Job logicExecutionJob;
@@ -32,7 +32,7 @@ void initSim() {
         Job* logicJobDeps = NULL;
         arrput(logicJobDeps, physicsTickJob);
 
-        initJob(&logicExecutionJob, logicJobDeps, logicExecution, (JobData){ NULL }, "[Sim] Logic Execution");
+        initJob(&logicExecutionJob, logicJobDeps, logicExecution, (JobData){ NULL }, "Logic Execution");
     }
 
     Job createFramePacketJob;
@@ -40,17 +40,20 @@ void initSim() {
         Job* createFramePacketDeps = NULL;
         arrput(createFramePacketDeps, logicExecutionJob);
 
-        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, (JobData){ NULL }, "[Sim] Create Frame Packet");
+        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, (JobData){ NULL }, "Create Frame Packet");
     }
 
-    simTreeExit = createFramePacketJob;
+    Job* simTreeJobs = NULL;
+    arrput(simTreeJobs, createFramePacketJob);
+
+    initJobTree(&simTree, simTreeJobs, "Sim");
 }
 
 void freeSim() {
-    freeJobTree(&simTreeExit);
+    freeJobTree(&simTree);
 }
 
 void executeSimTreeAsync() {
-    resetJobTree(&simTreeExit);
-    executeJobTreeAsync(&simTreeExit);
+    resetJobTree(&simTree);
+    executeJobTreeAsync(&simTree);
 }

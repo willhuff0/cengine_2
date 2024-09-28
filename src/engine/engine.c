@@ -12,6 +12,7 @@
 #include "../renderer/frame_packet.h"
 #include "../renderer/renderer.h"
 #include "../simulation/sim.h"
+#include "utils/fps_counter.h"
 
 static void printEngineInfo() {
     printf("GLFW version:   %s\n", windowGetGLFWVersionString());
@@ -46,6 +47,8 @@ void freeEngine() {
 }
 
 void engineLoop() {
+    startFpsCounter();
+
     while (!windowShouldClose()) {
         // Render previous frame packet (if available)
         // Run renderer in parallel
@@ -59,7 +62,7 @@ void engineLoop() {
         executeSimTreeAsync();
 
         // Wait for renderer to finish
-        waitForJobToFinish(&renderTreeExit);
+        waitForJobTreeToFinish(&renderTree);
 
         // Prep OpenGL for drawing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -71,9 +74,12 @@ void engineLoop() {
         windowSwapBuffers();
 
         // Wait for simulation to finish
-        waitForJobToFinish(&simTreeExit);
+        waitForJobTreeToFinish(&simTree);
 
         // Swap frame packets
         swapFramePackets();
+
+        // Clock FPS
+        tickFpsCounter();
     }
 }

@@ -7,7 +7,7 @@
 
 #include "../jobs/jobs.h"
 
-extern Job renderTreeExit;
+extern JobTree renderTree;
 
 void initRenderer();
 void freeRenderer();

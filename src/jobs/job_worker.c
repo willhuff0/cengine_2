@@ -7,7 +7,7 @@
 #include "job_system.h"
 #include "../common.h"
 
-static void workerFunc(const char* name) {
+static void workerFunc(char* name) {
     while(true) {
         pthread_mutex_lock(&jobSystemMutex);
 
@@ -16,27 +16,42 @@ static void workerFunc(const char* name) {
             break;
         }
 
-        Job* job = getNextJob();
+        const GetNextJobResult getNextJobResult = getNextJob();
         pthread_mutex_unlock(&jobSystemMutex);
 
-        if (job == NULL) continue;
+        if (getNextJobResult.job == NULL) continue;
 
 #ifdef JOB_SYSTEM_DEBUG_PRINT
-        printf("Worker '%s' starting job '%s'\n", name, job->name);
+        printf("Worker '%s' <= S job '[%s] %s'\n", name, getNextJobResult.jobTree->name, getNextJobResult.job->name);
 #endif
 
-        job->execute(job->data);
-        job->done = true;
-        unlockJob(job);
+        getNextJobResult.job->execute(getNextJobResult.job->data);
+
+        lockJobTree(getNextJobResult.jobTree);
+
+        getNextJobResult.job->inProgress = false;
+        getNextJobResult.job->done = true;
+
+        bool done = true;
+        for (int i = 0; i < arrlen(getNextJobResult.jobTree->jobs); ++i) {
+            if (!getNextJobResult.jobTree->jobs[i].done) done = false;
+        }
+        if (done) {
+            getNextJobResult.jobTree->done = true;
+        }
+
+        unlockJobTree(getNextJobResult.jobTree);
 
 #ifdef JOB_SYSTEM_DEBUG_PRINT
-        printf("Worker '%s' finished job '%s'\n", name, job->name);
+        printf("Worker '%s' F => job '[%s] %s'\n", name, getNextJobResult.jobTree->name, getNextJobResult.job->name);
 #endif
     }
+
+    free(name);
 }
 
-void initWorker(Worker* worker, const char* name) {
-    pthread_create(&worker->thread, NULL, workerFunc, (void*)name);
+void initWorker(Worker* worker, char* name) {
+    pthread_create(&worker->thread, NULL, workerFunc, name);
 }
 
 void freeWorker(const Worker* worker) {
