@@ -23,7 +23,7 @@ typedef struct {
     GLuint vbo;
     GLuint ebo;
 
-    AABB boundingBox;
+    AABB aabb;
 } SimpleMesh;
 
 // Adds a simple mesh to assets and returns its ID

@@ -27,7 +27,7 @@ SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t num
     glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, normal));    // Normals
 
     const SimpleMesh simpleMesh { material, numIndices, vao, vbo, ebo };
-    createAABBFromSimpleVertices(simpleMesh.boundingBox, vertices, numVertices);
+    createAABBFromSimpleVertices(simpleMesh.aabb, vertices, numVertices);
 
     arrput(assets.simpleMeshes, simpleMesh);
     return arrlen(assets.simpleMeshes) - 1;
@@ -45,7 +45,7 @@ SimpleMesh* lookupSimpleMesh(const SimpleMeshID id) {
 
 void bindSimpleMesh(const SimpleMeshID id) {
     glBindVertexArray(lookupSimpleMesh(id)->vao);
-    bindSimpleMaterial(lookupSimpleMesh(id)->material);
+    //bindSimpleMaterial(lookupSimpleMesh(id)->material);
 }
 
 void drawSimpleMesh(const SimpleMeshID id) {

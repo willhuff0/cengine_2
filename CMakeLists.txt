@@ -9,8 +9,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 
 add_executable(cengine_2 main.c
-        "src/jobs/job.c"
-        "src/jobs/job.h"
+        src/jobs/job.c
+        src/jobs/job.h
         src/common.h
         src/jobs/job_system.c
         src/jobs/job_system.h
@@ -20,12 +20,8 @@ add_executable(cengine_2 main.c
         src/stbi_impl.c
         src/renderer/frame_packet.c
         src/renderer/frame_packet.h
-        src/renderer/render_object.c
-        src/renderer/render_object.h
         src/simulation/sim_object.c
         src/simulation/sim_object.h
-        src/renderer/visibility/visibility_object.c
-        src/renderer/visibility/visibility_object.h
         src/engine/window.c
         src/engine/window.h
         src/common.c
@@ -45,8 +41,6 @@ add_executable(cengine_2 main.c
         src/renderer/renderer.h
         src/simulation/frame_packet_generator.c
         src/simulation/frame_packet_generator.h
-        src/renderer/visibility/visibility.c
-        src/renderer/visibility/visibility.h
         src/engine/assets.c
         src/engine/assets.h
         src/engine/assets/texture.c
@@ -57,14 +51,14 @@ add_executable(cengine_2 main.c
         src/engine/assets/simple_material.h
         src/engine/assets/simple_mesh.c
         src/engine/assets/simple_mesh.h
-        src/renderer/renderer_scene.c
-        src/renderer/renderer_scene.h
         src/engine/bounding_box.c
         src/engine/bounding_box.h
         src/engine/transform.c
         src/engine/transform.h
-        src/engine/assets/static_object.c
-        src/engine/assets/static_object.h
+        src/renderer/renderer_object.c
+        src/renderer/renderer_object.h
+        src/engine/draw_system.c
+        src/engine/draw_system.h
 )
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)

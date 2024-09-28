@@ -11,6 +11,7 @@ typedef struct {
     vec3 pos;
     vec3 rot;
     mat4 viewProjMat;
+    vec4 frustum[6];
 } FramePacketView;
 
 typedef struct {
@@ -18,6 +19,8 @@ typedef struct {
     float deltaTime;
 
     FramePacketView view;
+
+
 } FramePacket;
 
 extern FramePacket* rendererFramePacket;

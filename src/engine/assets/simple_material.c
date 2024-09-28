@@ -21,5 +21,5 @@ SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id) {
 }
 
 void bindSimpleMaterial(const SimpleMaterialID id) {
-    bindShader(lookupSimpleMaterial(id)->shader);
+    //bindShader(lookupSimpleMaterial(id)->shader);
 }
