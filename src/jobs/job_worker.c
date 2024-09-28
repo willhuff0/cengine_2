@@ -25,7 +25,7 @@ static void workerFunc(const char* name) {
         printf("Worker '%s' starting job '%s'", name, job->name);
 #endif
 
-        job->execute();
+        job->execute(job->data);
         job->done = true;
         pthread_mutex_unlock(job->mutex);
 
@@ -39,6 +39,6 @@ void initWorker(Worker* worker, const char* name) {
     pthread_create(&worker->thread, NULL, workerFunc, (void*)name);
 }
 
-void freeWorker(Worker* worker) {
+void freeWorker(const Worker* worker) {
     pthread_join(worker->thread, NULL);
 }

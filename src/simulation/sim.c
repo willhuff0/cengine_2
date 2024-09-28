@@ -16,7 +16,7 @@ Job simTreeExit;
 void initSim() {
     Job networkPollJob;
     {
-        initJob(&networkPollJob, NULL, networkPoll, "[JOB: (Sim) Network Poll");
+        initJob(&networkPollJob, NULL, networkPoll, { NULL }, "[JOB: (Sim) Network Poll");
     }
 
     Job physicsTickJob;
@@ -24,7 +24,7 @@ void initSim() {
         Job* physicsTickJobDeps = NULL;
         arrput(physicsTickJobDeps, networkPollJob);
 
-        initJob(&physicsTickJob, physicsTickJobDeps, executePhysicsTree, "[JOB: (Sim) Physics Tick");
+        initJob(&physicsTickJob, physicsTickJobDeps, executePhysicsTree, { NULL }, "[JOB: (Sim) Physics Tick");
     }
 
     Job logicExecutionJob;
@@ -32,7 +32,7 @@ void initSim() {
         Job* logicJobDeps = NULL;
         arrput(logicJobDeps, physicsTickJob);
 
-        initJob(&logicExecutionJob, logicJobDeps, logicExecution, "[JOB: (Sim) Logic Execution");
+        initJob(&logicExecutionJob, logicJobDeps, logicExecution, { NULL }, "[JOB: (Sim) Logic Execution");
     }
 
     Job createFramePacketJob;
@@ -40,7 +40,7 @@ void initSim() {
         Job* createFramePacketDeps = NULL;
         arrput(createFramePacketDeps, logicExecutionJob);
 
-        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, "[JOB: (Sim) Create Frame Packet");
+        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, { NULL }, "[JOB: (Sim) Create Frame Packet");
     }
 
     simTreeExit = createFramePacketJob;

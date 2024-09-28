@@ -57,6 +57,14 @@ add_executable(cengine_2 main.c
         src/engine/assets/simple_material.h
         src/engine/assets/simple_mesh.c
         src/engine/assets/simple_mesh.h
+        src/renderer/renderer_scene.c
+        src/renderer/renderer_scene.h
+        src/engine/bounding_box.c
+        src/engine/bounding_box.h
+        src/engine/transform.c
+        src/engine/transform.h
+        src/engine/assets/static_object.c
+        src/engine/assets/static_object.h
 )
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)

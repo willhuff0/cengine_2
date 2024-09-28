@@ -4,12 +4,13 @@
 
 #include "job.h"
 
-void initJob(Job* job, Job* deps, void (*execute)(), const char* name) {
+void initJob(Job* job, Job* deps, void (*execute)(void* data), JobData data, const char* name) {
     job->name = name;
     job->mutex = malloc(sizeof(pthread_mutex_t));
     pthread_mutex_init(job->mutex, NULL);
     job->deps = deps;
     job->execute = execute;
+    job->data = data;
     job->done = false;
 }
 

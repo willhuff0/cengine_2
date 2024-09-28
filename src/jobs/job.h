@@ -11,15 +11,26 @@
 
 typedef struct Job Job;
 
+typedef union {
+    void* ptr;
+    int64_t number;
+    uint64_t unsignedNumber;
+    struct {
+        int n1;
+        int n2;
+    } twoNumbers;
+} JobData;
+
 struct Job {
     const char* name;
     pthread_mutex_t* mutex;
     Job* deps;
-    void (*execute)();
+    void (*execute)(void* data);
+    JobData data;
     bool done;
 };
 
-void initJob(Job* job, Job* deps, void (*execute)(), const char* name);
+void initJob(Job* job, Job* deps, void (*execute)(), JobData data, const char* name);
 void freeJob(Job* job);
 
 void freeJobTree(Job* exit);

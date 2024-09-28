@@ -12,6 +12,6 @@ typedef struct {
 } Worker;
 
 void initWorker(Worker* worker, const char* name);
-void freeWorker(Worker* worker);
+void freeWorker(const Worker* worker);
 
 #endif //JOB_WORKER_H

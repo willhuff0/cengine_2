@@ -6,6 +6,7 @@
 #define SIMPLE_MESH_H
 
 #include "simple_material.h"
+#include "../bounding_box.h"
 
 typedef int SimpleMeshID;
 
@@ -17,10 +18,12 @@ typedef struct {
 typedef struct {
     SimpleMaterialID material;
 
-    int64_t numIndices;
+    int numIndices;
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
+
+    AABB boundingBox;
 } SimpleMesh;
 
 // Adds a simple mesh to assets and returns its ID
@@ -33,6 +36,6 @@ SimpleMesh* lookupSimpleMesh(const SimpleMeshID id);
 
 void bindSimpleMesh(const SimpleMeshID id);
 void drawSimpleMesh(const SimpleMeshID id);
-void drawSimpleMeshInstanced(const SimpleMeshID id, int numInstances);
+void drawSimpleMeshInstanced(const SimpleMeshID id, const int numInstances);
 
 #endif //SIMPLE_MESH_H

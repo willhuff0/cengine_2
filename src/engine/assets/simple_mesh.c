@@ -4,7 +4,9 @@
 
 #include "simple_mesh.h"
 
-SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t numVertices, const SimpleVertex* vertices, const int64_t numIndices, const unsigned int* indices) {
+#include "../assets.h"
+
+SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t numVertices, const SimpleVertex* vertices, const int numIndices, const unsigned int* indices) {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -17,27 +19,39 @@ SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t num
     GLuint ebo;
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * (int64_t)sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * (int)sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)0);                                 // Positions
     glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, normal));    // Normals
 
-    SimpleMesh* mesh = malloc(sizeof(SimpleMesh));
-    mesh->material = material;
-    mesh->vao = vao;
-    mesh->vbo = vbo;
-    mesh->ebo = ebo;
-    mesh->numIndices = numIndices;
-    arrput(scene.simpleMeshes, mesh);
-    if (outMesh != NULL) *outMesh = mesh;
+    const SimpleMesh simpleMesh { material, numIndices, vao, vbo, ebo };
+    createAABBFromSimpleVertices(simpleMesh.boundingBox, vertices, numVertices);
+
+    arrput(assets.simpleMeshes, simpleMesh);
+    return arrlen(assets.simpleMeshes) - 1;
 }
 
-void freeSimpleMesh(const SimpleMesh* simpleMesh);
+void freeSimpleMesh(const SimpleMesh* simpleMesh) {
+    glDeleteVertexArrays(1, &simpleMesh->vao);
+    glDeleteBuffers(1, &simpleMesh->vbo);
+    glDeleteBuffers(1, &simpleMesh->ebo);
+}
 
-SimpleMesh* lookupSimpleMesh(const SimpleMeshID id);
+SimpleMesh* lookupSimpleMesh(const SimpleMeshID id) {
+    return &assets.simpleMeshes[id];
+}
 
-void bindSimpleMesh(const SimpleMeshID id);
-void drawSimpleMesh(const SimpleMeshID id);
-void drawSimpleMeshInstanced(const SimpleMeshID id, int numInstances);
+void bindSimpleMesh(const SimpleMeshID id) {
+    glBindVertexArray(lookupSimpleMesh(id)->vao);
+    bindSimpleMaterial(lookupSimpleMesh(id)->material);
+}
+
+void drawSimpleMesh(const SimpleMeshID id) {
+    glDrawElements(GL_TRIANGLES, lookupSimpleMesh(id)->numIndices, GL_UNSIGNED_INT, NULL);
+}
+
+void drawSimpleMeshInstanced(const SimpleMeshID id, const int numInstances) {
+    glDrawElementsInstanced(GL_TRIANGLES, lookupSimpleMesh(id)->numIndices, GL_UNSIGNED_INT, NULL, numInstances);
+}
