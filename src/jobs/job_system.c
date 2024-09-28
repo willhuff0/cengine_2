@@ -56,9 +56,9 @@ void executeJobTreeSync(const Job* exit) {
     waitForJobToFinish(exit);
 }
 
-// Returns nullptr if job itself or all deps are in progress
+// Returns NULL if job itself or all deps are in progress
 static Job* findIncompleteJob(Job* job) {
-    if (pthread_mutex_trylock(job->mutex) != 0) return NULL; // job is already in progress
+    if (!tryLockJob(job)) return NULL; // job is already in progress
     if (job->done) return job;
 
     bool depInProgress = false;
@@ -70,38 +70,42 @@ static Job* findIncompleteJob(Job* job) {
             continue;
         }
         if (result->done) {
-            pthread_mutex_unlock(result->mutex);
+            unlockJob(result);
             continue;
         }
 
-        pthread_mutex_unlock(job->mutex);
+        unlockJob(job);
         return result;
     }
 
     if (depInProgress) {
-        pthread_mutex_unlock(job->mutex);
+        unlockJob(job);
         return NULL;
     }
 
     return job;
 }
 
-// Gets the next job to execute and acquires a mutex lock. If there are no jobs to execute, returns nullptr.
+// Gets the next job to execute and acquires a mutex lock. If there are no jobs to execute, returns NULL.
 // Should only be called from worker threads.
 Job* getNextJob() {
     if (trees == NULL) return NULL;
 
-    // Delete all job trees from list that are done
     for (int i = arrlen(trees) - 1; i >= 0; --i) {
-        if (trees[i]->done) {
-            arrdel(trees, i);
-        }
-    }
-
-    for (int i = 0; i < arrlen(trees); i++) {
         Job* next = findIncompleteJob(trees[i]);
-        if (next != NULL) return next;
+
+        if (next == NULL) continue;
+
+        if (next == trees[i] && next->done) {
+            arrdel(trees, i);
+            unlockJob(next);
+            continue;
+        }
+
+        return next;
     }
 
     return NULL;
 }
+
+// TODO: Create separate job tree struct which workers will wait to lock when all jobs are done so that waitForJobToFinish doesnt fight over trylock

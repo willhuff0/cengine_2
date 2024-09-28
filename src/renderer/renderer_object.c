@@ -15,7 +15,7 @@ void freeRendererObjects() {
 }
 
 RendererObjectID registerSimpleRendererObject(const SimpleMeshID simpleMesh, const bool isTransparent) {
-    const RendererObject rendererObject {
+    const RendererObject rendererObject = {
         .type = isTransparent ? SIMPLE_TRANSPARENT_RENDERER_OBJECT : SIMPLE_OPAQUE_RENDERER_OBJECT,
         .mesh = { .simpleMesh = simpleMesh },
         .transform = { .pos = { 0.0f, 0.0f, 0.0f }, .rot = { 0.0f, 0.0f, 0.0f, 1.0f }, .scale = { 1.0f, 1.0f, 1.0f }, },

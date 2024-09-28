@@ -9,7 +9,7 @@
 
 #include "window.h"
 
-static typedef struct {
+typedef struct {
     int key;
 } MapEntry;
 

@@ -21,7 +21,7 @@ static TextureID createTexture(uint8_t* data, const int width, const int height,
 
     stbi_image_free(data);
 
-    const Texture texture { gl_texture };
+    const Texture texture = { gl_texture };
     arrput(assets.textures, texture);
     return arrlen(assets.textures) - 1;
 }

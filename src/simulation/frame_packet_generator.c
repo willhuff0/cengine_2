@@ -7,5 +7,5 @@
 #include "../renderer/frame_packet.h"
 
 void generateFramePacket() {
-    glm_vec3_copy((vec3){-10.0f + (float)glfwGetTime(), 0.0f, 0.0f}, simFramePacket->pos);
+    glm_vec3_copy((vec3){-10.0f + (float)glfwGetTime(), 0.0f, 0.0f}, simFramePacket->view.pos);
 }

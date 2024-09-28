@@ -4,6 +4,7 @@
 
 #include "engine.h"
 
+#include "draw_system.h"
 #include "../common.h"
 
 #include "input.h"
@@ -46,7 +47,7 @@ void freeEngine() {
 
 void engineLoop() {
     while (!windowShouldClose()) {
-        // Render previous render packet (if available)
+        // Render previous frame packet (if available)
         // Run renderer in parallel
         executeRenderTreeAsync();
 
@@ -60,8 +61,11 @@ void engineLoop() {
         // Wait for renderer to finish
         waitForJobToFinish(&renderTreeExit);
 
+        // Prep OpenGL for drawing
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // Execute draw queue
-        // TODO: EXECUTE DRAW COMMANDS
+        executeDrawQueue();
 
         // Present drawn frame
         windowSwapBuffers();

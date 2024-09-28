@@ -25,12 +25,13 @@ struct Job {
     const char* name;
     pthread_mutex_t* mutex;
     Job* deps;
-    void (*execute)(void* data);
+    void (*execute)(JobData data);
     JobData data;
     bool done;
+    bool locked;
 };
 
-void initJob(Job* job, Job* deps, void (*execute)(), JobData data, const char* name);
+void initJob(Job* job, Job* deps, void (*execute)(JobData data), const JobData data, const char* name);
 void freeJob(Job* job);
 
 void freeJobTree(Job* exit);
@@ -38,5 +39,9 @@ void freeJobTree(Job* exit);
 void resetJobTree(Job* exit);
 
 void waitForJobToFinish(const Job* job);
+
+void lockJob(Job* job);
+bool tryLockJob(Job* job);
+void unlockJob(Job* job);
 
 #endif //JOB_H

@@ -6,7 +6,9 @@
 
 #include <minwindef.h>
 
-void createAABBFromSimpleVertices(AABB dest, const SimpleVertex* vertices, const int numVertices) {
+#include "assets/simple_mesh.h"
+
+void createAABBFromSimpleVertices(AABB dest, const SimpleVertex* vertices, const int64_t numVertices) {
     assert(numVertices > 0);
 
     float minX = FLT_MAX;

@@ -6,11 +6,12 @@
 #define BOUNDING_BOX_H
 
 #include "../common.h"
-#include "assets/simple_mesh.h"
 
 typedef vec3 AABB[2];
 
-void createAABBFromSimpleVertices(AABB dest, const SimpleVertex* vertices, const int numVertices);
+typedef struct SimpleVertex SimpleVertex;
+
+void createAABBFromSimpleVertices(AABB dest, const SimpleVertex* vertices, const int64_t numVertices);
 
 bool aabbIsInFrustum(AABB aabb, mat4 transform, vec4 frustum[6]);
 

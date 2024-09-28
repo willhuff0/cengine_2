@@ -22,15 +22,15 @@ static void workerFunc(const char* name) {
         if (job == NULL) continue;
 
 #ifdef JOB_SYSTEM_DEBUG_PRINT
-        printf("Worker '%s' starting job '%s'", name, job->name);
+        printf("Worker '%s' starting job '%s'\n", name, job->name);
 #endif
 
         job->execute(job->data);
         job->done = true;
-        pthread_mutex_unlock(job->mutex);
+        unlockJob(job);
 
 #ifdef JOB_SYSTEM_DEBUG_PRINT
-        printf("Worker '%s' finished job '%s'", name, job->name);
+        printf("Worker '%s' finished job '%s'\n", name, job->name);
 #endif
     }
 }

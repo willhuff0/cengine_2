@@ -10,10 +10,10 @@
 
 typedef int SimpleMeshID;
 
-typedef struct {
+struct SimpleVertex {
     vec3 position;
     vec3 normal;
-} SimpleVertex;
+};
 
 typedef struct {
     SimpleMaterialID material;
@@ -28,7 +28,7 @@ typedef struct {
 
 // Adds a simple mesh to assets and returns its ID
 // Returns -1 if an error occurs
-SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t numVertices, const SimpleVertex* vertices, const int64_t numIndices, const unsigned int* indices);
+SimpleMeshID createSimpleMesh(const SimpleMaterialID material, const int64_t numVertices, const SimpleVertex* vertices, const int numIndices, const unsigned int* indices);
 
 void freeSimpleMesh(const SimpleMesh* simpleMesh);
 

@@ -27,4 +27,10 @@ typedef struct {
 
 extern DrawInstruction* drawInstructions;
 
+void initDrawSystem();
+void freeDrawSystem();
+
+// Must be called from the main thread
+void executeDrawQueue();
+
 #endif //DRAW_SYSTEM_H

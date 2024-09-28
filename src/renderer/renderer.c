@@ -12,18 +12,18 @@ Job renderTreeExit;
 
 static Job iterateObjectsJob;
 static Job buildOpaqueDrawQueueJob;
-static Job buildTransparentDrawQueueJob;
+static Job buildTransparentsDrawQueueJob;
 
-static typedef struct {
+typedef struct {
     RendererObjectID rendererObject;
     int processedRenderObjectIndex;
 } ProcessRendererObjectInstruction;
 
-static typedef struct {
+typedef struct {
     RendererObject* rendererObject;
 } ProcessedOpaqueRendererObject;
 
-static typedef struct {
+typedef struct {
     RendererObject* rendererObject;
     float distanceSqr;
 } ProcessedTransparentRendererObject;
@@ -62,8 +62,8 @@ static void processTransparentRenderObject(const ProcessRendererObjectInstructio
 // Creates jobs (deps for sort transparents and build opaque draw queue)
 static void iterateVisibleObjects() {
     // Prevent workers from starting jobs before the buffers are allocated
-    pthread_mutex_lock(buildOpaqueDrawQueueJob.mutex);
-    pthread_mutex_lock(buildTransparentDrawQueueJob.mutex);
+    lockJob(&buildOpaqueDrawQueueJob);
+    lockJob(&buildTransparentsDrawQueueJob);
 
     numOpaqueRendererObjects = 0;
     numTransparentRendererObjects = 0;
@@ -74,7 +74,7 @@ static void iterateVisibleObjects() {
             case SIMPLE_OPAQUE_RENDERER_OBJECT:
             case UBER_OPAQUE_RENDERER_OBJECT:
                 Job processOpaqueRenderObjectJob;
-                initJob(&processOpaqueRenderObjectJob, NULL, processOpaqueRenderObject, { .twoNumbers = { i, numOpaqueRendererObjects } }, "[Renderer] Process Opaque Renderer Object");
+                initJob(&processOpaqueRenderObjectJob, NULL, processOpaqueRenderObject, (JobData){ .twoNumbers = { i, numOpaqueRendererObjects } }, "[Renderer] Process Opaque Renderer Object");
 
                 arrput(buildOpaqueDrawQueueJob.deps, processOpaqueRenderObjectJob);
 
@@ -83,9 +83,9 @@ static void iterateVisibleObjects() {
             case SIMPLE_TRANSPARENT_RENDERER_OBJECT:
             case UBER_TRANSPARENT_RENDERER_OBJECT:
                 Job processTransparentRenderObjectJob;
-                initJob(&processTransparentRenderObjectJob, NULL, processTransparentRenderObject, { .twoNumbers = { i, numTransparentRendererObjects } }, "[Renderer] Process Transparent Renderer Object");
+                initJob(&processTransparentRenderObjectJob, NULL, processTransparentRenderObject, (JobData){ .twoNumbers = { i, numTransparentRendererObjects } }, "[Renderer] Process Transparent Renderer Object");
 
-                arrput(buildTransparentDrawQueueJob.deps, processTransparentRenderObjectJob);
+                arrput(buildTransparentsDrawQueueJob.deps, processTransparentRenderObjectJob);
 
                 numTransparentRendererObjects++;
                 break;
@@ -103,8 +103,8 @@ static void iterateVisibleObjects() {
     uberMaterialOffset = arrlen(assets.simpleMaterials);
 
     // Allow workers to start working on jobs and access buffers
-    pthread_mutex_unlock(buildOpaqueDrawQueueJob.mutex);
-    pthread_mutex_unlock(buildTransparentDrawQueueJob.mutex);
+    unlockJob(&buildOpaqueDrawQueueJob);
+    unlockJob(&buildTransparentsDrawQueueJob);
 }
 
 static int compareOpaqueRendererObjectsByMaterialThenShaderThenMesh(const ProcessedOpaqueRendererObject* a, const ProcessedOpaqueRendererObject* b) {
@@ -172,22 +172,22 @@ static void buildOpaqueDrawQueue() {
             shaderID = lookupSimpleMaterial(materialID)->shader;
 
             if (shaderID != currentShaderID) {
-                const DrawInstruction bindShaderDrawInstruction { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
+                const DrawInstruction bindShaderDrawInstruction = { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
                 arrput(opaqueDrawInstructions, bindShaderDrawInstruction);
                 currentShaderID = shaderID;
             }
             if (materialID != currentMaterialID) {
-                const DrawInstruction bindSimpleMaterialDrawInstruction { .type = DRAW_BIND_SIMPLE_MATERIAL, .data.simpleMaterial = materialID };
+                const DrawInstruction bindSimpleMaterialDrawInstruction = { .type = DRAW_BIND_SIMPLE_MATERIAL, .data.simpleMaterial = materialID };
                 arrput(opaqueDrawInstructions, bindSimpleMaterialDrawInstruction);
                 currentMaterialID = materialID;
             }
             if (meshID != currentMeshID) {
-                const DrawInstruction bindSimpleMeshDrawInstruction { .type = DRAW_BIND_SIMPLE_MESH, .data.simpleMesh = meshID };
+                const DrawInstruction bindSimpleMeshDrawInstruction = { .type = DRAW_BIND_SIMPLE_MESH, .data.simpleMesh = meshID };
                 arrput(opaqueDrawInstructions, bindSimpleMeshDrawInstruction);
                 currentMeshID = meshID;
             }
 
-            const DrawInstruction drawSimpleMeshInstruction { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
+            const DrawInstruction drawSimpleMeshInstruction = { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
             arrput(opaqueDrawInstructions, drawSimpleMeshInstruction);
         } else {
             const int uberMeshId = processedOpaqueRenderObject->rendererObject->mesh.uberMesh;
@@ -198,23 +198,23 @@ static void buildOpaqueDrawQueue() {
             shaderID = -1;
 
             if (shaderID != currentShaderID) {
-                const DrawInstruction bindShaderDrawInstruction { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
+                const DrawInstruction bindShaderDrawInstruction = { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
                 arrput(opaqueDrawInstructions, bindShaderDrawInstruction);
                 currentShaderID = shaderID;
             }
             // if (materialID != currentMaterialID) {
             //     int uberMaterialID = materialID - uberMaterialOffset;
-            //     const DrawInstruction bindUberMaterialDrawInstruction { .type = DRAW_BIND_UBER_MATERIAL, .data.uberMaterial = uberMaterialID };
+            //     const DrawInstruction bindUberMaterialDrawInstruction = { .type = DRAW_BIND_UBER_MATERIAL, .data.uberMaterial = uberMaterialID };
             //     arrput(opaqueDrawInstructions, bindUberMaterialDrawInstruction);
             //     currentMaterialID = materialID;
             // }
             // if (meshID != currentMeshID) {
-            //     const DrawInstruction bindUberMeshDrawInstruction { .type = DRAW_BIND_UBER_MESH, .data.uberMesh = uberMeshId };
+            //     const DrawInstruction bindUberMeshDrawInstruction = { .type = DRAW_BIND_UBER_MESH, .data.uberMesh = uberMeshId };
             //     arrput(opaqueDrawInstructions, bindUberMeshDrawInstruction);
             //     currentMeshID = meshID;
             // }
 
-            // const DrawInstruction drawUberMeshInstruction { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
+            // const DrawInstruction drawUberMeshInstruction = { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
             // arrput(opaqueDrawInstructions, drawUberMeshInstruction);
         }
     }
@@ -253,22 +253,22 @@ static void buildTransparentsDrawQueue() {
             shaderID = lookupSimpleMaterial(materialID)->shader;
 
             if (shaderID != currentShaderID) {
-                const DrawInstruction bindShaderDrawInstruction { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
+                const DrawInstruction bindShaderDrawInstruction = { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
                 arrput(opaqueDrawInstructions, bindShaderDrawInstruction);
                 currentShaderID = shaderID;
             }
             if (materialID != currentMaterialID) {
-                const DrawInstruction bindSimpleMaterialDrawInstruction { .type = DRAW_BIND_SIMPLE_MATERIAL, .data.simpleMaterial = materialID };
+                const DrawInstruction bindSimpleMaterialDrawInstruction = { .type = DRAW_BIND_SIMPLE_MATERIAL, .data.simpleMaterial = materialID };
                 arrput(opaqueDrawInstructions, bindSimpleMaterialDrawInstruction);
                 currentMaterialID = materialID;
             }
             if (meshID != currentMeshID) {
-                const DrawInstruction bindSimpleMeshDrawInstruction { .type = DRAW_BIND_SIMPLE_MESH, .data.simpleMesh = meshID };
+                const DrawInstruction bindSimpleMeshDrawInstruction = { .type = DRAW_BIND_SIMPLE_MESH, .data.simpleMesh = meshID };
                 arrput(opaqueDrawInstructions, bindSimpleMeshDrawInstruction);
                 currentMeshID = meshID;
             }
 
-            const DrawInstruction drawSimpleMeshInstruction { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
+            const DrawInstruction drawSimpleMeshInstruction = { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
             arrput(opaqueDrawInstructions, drawSimpleMeshInstruction);
         } else {
             const int uberMeshId = processedTransparentRenderObject->rendererObject->mesh.uberMesh;
@@ -279,23 +279,23 @@ static void buildTransparentsDrawQueue() {
             shaderID = -1;
 
             if (shaderID != currentShaderID) {
-                const DrawInstruction bindShaderDrawInstruction { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
+                const DrawInstruction bindShaderDrawInstruction = { .type = DRAW_BIND_SHADER, .data.shader = shaderID };
                 arrput(opaqueDrawInstructions, bindShaderDrawInstruction);
                 currentShaderID = shaderID;
             }
             // if (materialID != currentMaterialID) {
             //     int uberMaterialID = materialID - uberMaterialOffset;
-            //     const DrawInstruction bindUberMaterialDrawInstruction { .type = DRAW_BIND_UBER_MATERIAL, .data.uberMaterial = uberMaterialID };
+            //     const DrawInstruction bindUberMaterialDrawInstruction = { .type = DRAW_BIND_UBER_MATERIAL, .data.uberMaterial = uberMaterialID };
             //     arrput(opaqueDrawInstructions, bindUberMaterialDrawInstruction);
             //     currentMaterialID = materialID;
             // }
             // if (meshID != currentMeshID) {
-            //     const DrawInstruction bindUberMeshDrawInstruction { .type = DRAW_BIND_UBER_MESH, .data.uberMesh = uberMeshId };
+            //     const DrawInstruction bindUberMeshDrawInstruction = { .type = DRAW_BIND_UBER_MESH, .data.uberMesh = uberMeshId };
             //     arrput(opaqueDrawInstructions, bindUberMeshDrawInstruction);
             //     currentMeshID = meshID;
             // }
 
-            // const DrawInstruction drawUberMeshInstruction { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
+            // const DrawInstruction drawUberMeshInstruction = { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
             // arrput(opaqueDrawInstructions, drawUberMeshInstruction);
         }
     }
@@ -311,13 +311,13 @@ static void mergeDrawQueues() {
         arrput(buildOpaqueDrawQueueJob.deps, iterateObjectsJob);
     }
 
-    if (arrlen(buildTransparentDrawQueueJob.deps) > 1 ) {
-        for (int i = 1; i < arrlen(buildTransparentDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildTransparentDrawQueueJob.deps[i]);
+    if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
+        for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
+            freeJobTree(&buildTransparentsDrawQueueJob.deps[i]);
         }
-        arrfree(buildTransparentDrawQueueJob.deps);
-        buildTransparentDrawQueueJob.deps = NULL;
-        arrput(buildTransparentDrawQueueJob.deps, iterateObjectsJob);
+        arrfree(buildTransparentsDrawQueueJob.deps);
+        buildTransparentsDrawQueueJob.deps = NULL;
+        arrput(buildTransparentsDrawQueueJob.deps, iterateObjectsJob);
     }
 
     if (drawInstructions != NULL) {
@@ -349,22 +349,21 @@ void initRenderer() {
     initRendererObjects();
 
     {
-        initJob(&iterateObjectsJob, NULL, iterateVisibleObjects, { NULL }, "[RENDERER] Iterate Objects");
+        initJob(&iterateObjectsJob, NULL, iterateVisibleObjects, (JobData){ NULL }, "[RENDERER] Iterate Objects");
     }
 
     {
         Job* buildOpaqueDrawQueueDeps = NULL;
         arrput(buildOpaqueDrawQueueDeps, iterateObjectsJob);
 
-        initJob(&buildOpaqueDrawQueueJob, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, { NULL }, "[RENDERER] Build Opaque Draw Queue");
+        initJob(&buildOpaqueDrawQueueJob, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, (JobData){ NULL }, "[RENDERER] Build Opaque Draw Queue");
     }
 
-    Job buildTransparentsDrawQueueJob;
     {
         Job* buildTransparentsDrawQueueDeps = NULL;
         arrput(buildTransparentsDrawQueueDeps, iterateObjectsJob);
 
-        initJob(&buildTransparentsDrawQueueJob, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, { NULL }, "[RENDERER] Build Transparents Draw Queue");
+        initJob(&buildTransparentsDrawQueueJob, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, (JobData){ NULL }, "[RENDERER] Build Transparents Draw Queue");
     }
 
     Job mergeDrawQueuesJob;
@@ -373,7 +372,7 @@ void initRenderer() {
         arrput(mergeDrawQueuesDeps, buildOpaqueDrawQueueJob);
         arrput(mergeDrawQueuesDeps, buildTransparentsDrawQueueJob);
 
-        initJob(&mergeDrawQueuesJob, mergeDrawQueuesDeps, mergeDrawQueues, { NULL }, "[RENDERER] Merge Draw Queues");
+        initJob(&mergeDrawQueuesJob, mergeDrawQueuesDeps, mergeDrawQueues, (JobData){ NULL }, "[RENDERER] Merge Draw Queues");
     }
 
     renderTreeExit = mergeDrawQueuesJob;
@@ -394,13 +393,13 @@ void executeRenderTreeAsync() {
         arrput(buildOpaqueDrawQueueJob.deps, iterateObjectsJob);
     }
 
-    if (arrlen(buildTransparentDrawQueueJob.deps) > 1 ) {
-        for (int i = 1; i < arrlen(buildTransparentDrawQueueJob.deps); ++i) {
-            freeJobTree(&buildTransparentDrawQueueJob.deps[i]);
+    if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
+        for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
+            freeJobTree(&buildTransparentsDrawQueueJob.deps[i]);
         }
-        arrfree(buildTransparentDrawQueueJob.deps);
-        buildTransparentDrawQueueJob.deps = NULL;
-        arrput(buildTransparentDrawQueueJob.deps, iterateObjectsJob);
+        arrfree(buildTransparentsDrawQueueJob.deps);
+        buildTransparentsDrawQueueJob.deps = NULL;
+        arrput(buildTransparentsDrawQueueJob.deps, iterateObjectsJob);
     }
 
     resetJobTree(&renderTreeExit);

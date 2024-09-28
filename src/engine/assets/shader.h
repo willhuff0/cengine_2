@@ -21,7 +21,7 @@ typedef struct {
 
 // Adds a shader to assets and returns its ID
 // Returns -1 if an error occurs
-ShaderID createShader(const char* vertexPath, const char* fragmentPath);
+ShaderID createShaderFromPaths(const char* vertexPath, const char* fragmentPath);
 
 void freeShader(const Shader* shader);
 

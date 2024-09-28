@@ -5,10 +5,7 @@
 #include "network.h"
 
 #include <stdio.h>
-#include <unistd.h>
 
 void networkPoll() {
-    printf("networkPoll start\n");
-    sleep(3);
-    printf("networkPoll done\n");
+    printf("networkPoll\n");
 }

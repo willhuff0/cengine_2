@@ -29,6 +29,8 @@ extern FramePacket* simFramePacket;
 void initFramePackets();
 void freeFramePackets();
 
+void resetFramePacket(FramePacket* framePacket);
+
 void swapFramePackets();
 
 #endif //FRAME_PACKET_H

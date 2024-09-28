@@ -73,7 +73,7 @@ static void lookupShaderUniformLocations(Shader* shader) {
     }
 }
 
-ShaderID createShader(const char* vertexPath, const char* fragmentPath) {
+ShaderID createShaderFromPaths(const char* vertexPath, const char* fragmentPath) {
     GLuint vertShader;
     if (!createShader(&vertShader, vertexPath, GL_VERTEX_SHADER)) {
         return -1;
@@ -102,7 +102,7 @@ ShaderID createShader(const char* vertexPath, const char* fragmentPath) {
         return -1;
     }
 
-    Shader shader { program, NULL };
+    Shader shader = { program, NULL };
 
     shdefault(shader.uniformLocations, -1);
     lookupShaderUniformLocations(&shader);

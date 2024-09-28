@@ -7,7 +7,7 @@
 #include "../assets.h"
 
 SimpleMaterialID createSimpleMaterial(const ShaderID shader, vec4 color) {
-    SimpleMaterial simpleMaterial { shader };
+    SimpleMaterial simpleMaterial = { shader };
     glm_vec4_copy(color, simpleMaterial.color);
 
     arrput(assets.simpleMaterials, simpleMaterial);
@@ -21,5 +21,5 @@ SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id) {
 }
 
 void bindSimpleMaterial(const SimpleMaterialID id) {
-    //bindShader(lookupSimpleMaterial(id)->shader);
+    setUniformVec4(lookupSimpleMaterial(id)->shader, "CENGINE_SIMPLE_MATERIAL_COLOR", lookupSimpleMaterial(id)->color);
 }

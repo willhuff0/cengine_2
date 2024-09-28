@@ -16,6 +16,13 @@ void freeFramePackets() {
     free(simFramePacket);
 }
 
+void resetFramePacket(FramePacket* framePacket) {
+    framePacket->time = 0.0f;
+    framePacket->deltaTime = 0.0f;
+
+    // TODO: Set everything to zero, clear change buffers
+}
+
 void swapFramePackets() {
     FramePacket* temp = rendererFramePacket;
     rendererFramePacket = simFramePacket;
