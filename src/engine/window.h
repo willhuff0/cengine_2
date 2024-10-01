@@ -22,4 +22,7 @@ void windowDisableInputCallbacks();
 
 const char* windowGetGLFWVersionString();
 
+int getWindowWidth();
+int getWindowHeight();
+
 #endif //WINDOW_H

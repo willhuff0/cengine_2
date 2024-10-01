@@ -53,8 +53,6 @@ add_executable(cengine_2 main.c
         src/engine/assets/simple_mesh.h
         src/engine/bounding_box.c
         src/engine/bounding_box.h
-        src/engine/transform.c
-        src/engine/transform.h
         src/renderer/renderer_object.c
         src/renderer/renderer_object.h
         src/engine/draw_system.c
@@ -62,15 +60,16 @@ add_executable(cengine_2 main.c
         src/engine/utils/fps_counter.c
         src/engine/utils/fps_counter.h
         src/paths.h
+        src/engine/utils/model_loader.c
+        src/engine/utils/model_loader.h
 )
 
 target_include_directories(cengine_2 PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
 
 target_link_libraries(cengine_2 PRIVATE
         ${PROJECT_SOURCE_DIR}/libs/libglfw3.a
-        ${PROJECT_SOURCE_DIR}/libs/libGLESv2.lib
-        ${PROJECT_SOURCE_DIR}/libs/libEGL.lib
-        ${PROJECT_SOURCE_DIR}/libs/libassimp.dll.a
+        ${PROJECT_SOURCE_DIR}/libs/libGLESv2.dll.lib
+        ${PROJECT_SOURCE_DIR}/libs/libEGL.dll.lib
         ${PROJECT_SOURCE_DIR}/libs/libcglm.a
-        ${PROJECT_SOURCE_DIR}/libs/libode_single.dll.a
+        ${PROJECT_SOURCE_DIR}/libs/assimp-vc143-mt.lib
 )

@@ -16,37 +16,37 @@ JobTree simTree;
 void initSim() {
     Job networkPollJob;
     {
-        initJob(&networkPollJob, NULL, networkPoll, (JobData){ NULL }, "Network Poll");
+        initJob(&networkPollJob, 0, NULL, networkPoll, (JobData){ NULL }, "Network Poll");
     }
 
     Job physicsTickJob;
     {
-        Job* physicsTickJobDeps = NULL;
-        arrput(physicsTickJobDeps, networkPollJob);
+        Job* physicsTickJobDeps = malloc(1 * sizeof(Job));
+        physicsTickJobDeps[0] = networkPollJob;
 
-        initJob(&physicsTickJob, physicsTickJobDeps, executePhysicsTree, (JobData){ NULL }, "Physics Tick");
+        initJob(&physicsTickJob, 1, physicsTickJobDeps, executePhysicsTree, (JobData){ NULL }, "Physics Tick");
     }
 
     Job logicExecutionJob;
     {
-        Job* logicJobDeps = NULL;
-        arrput(logicJobDeps, physicsTickJob);
+        Job* logicJobDeps = malloc(1 * sizeof(Job));
+        logicJobDeps[0] = physicsTickJob;
 
-        initJob(&logicExecutionJob, logicJobDeps, logicExecution, (JobData){ NULL }, "Logic Execution");
+        initJob(&logicExecutionJob, 1, logicJobDeps, logicExecution, (JobData){ NULL }, "Logic Execution");
     }
 
     Job createFramePacketJob;
     {
-        Job* createFramePacketDeps = NULL;
-        arrput(createFramePacketDeps, logicExecutionJob);
+        Job* createFramePacketDeps = malloc(1 * sizeof(Job));;
+        createFramePacketDeps[0] = logicExecutionJob;
 
-        initJob(&createFramePacketJob, createFramePacketDeps, generateFramePacket, (JobData){ NULL }, "Create Frame Packet");
+        initJob(&createFramePacketJob, 1, createFramePacketDeps, generateFramePacket, (JobData){ NULL }, "Create Frame Packet");
     }
 
-    Job* simTreeJobs = NULL;
-    arrput(simTreeJobs, createFramePacketJob);
+    Job* simTreeJobs = malloc(1 * sizeof(Job));
+    simTreeJobs[0] = createFramePacketJob;
 
-    initJobTree(&simTree, simTreeJobs, "Sim");
+    initJobTree(&simTree, 1, simTreeJobs, "Sim");
 }
 
 void freeSim() {

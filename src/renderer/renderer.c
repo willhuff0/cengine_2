@@ -10,9 +10,8 @@
 
 JobTree renderTree;
 
-static Job iterateObjectsJob;
-static Job buildOpaqueDrawQueueJob;
-static Job buildTransparentsDrawQueueJob;
+static Job* buildOpaqueDrawQueueJob;
+static Job* buildTransparentsDrawQueueJob;
 
 typedef struct {
     RendererObjectID rendererObject;
@@ -20,11 +19,11 @@ typedef struct {
 } ProcessRendererObjectInstruction;
 
 typedef struct {
-    RendererObject* rendererObject;
+    RendererObjectID rendererObject;
 } ProcessedOpaqueRendererObject;
 
 typedef struct {
-    RendererObject* rendererObject;
+    RendererObjectID rendererObject;
     float distanceSqr;
 } ProcessedTransparentRendererObject;
 
@@ -38,24 +37,28 @@ static int uberMeshOffset;
 static int uberMaterialOffset;
 
 static void processOpaqueRenderObject(const ProcessRendererObjectInstruction instruction) {
+#ifdef RENDERER_ENABLE_CULLING
     if (!aabbIsInFrustum(GET_RENDERER_OBJECT_AABB(lookupRendererObject(instruction.rendererObject)), lookupRendererObject(instruction.rendererObject)->transform.matrix, rendererFramePacket->view.frustum)) {
-        processedOpaqueRendererObjects[instruction.processedRenderObjectIndex].rendererObject = NULL;
+        processedOpaqueRendererObjects[instruction.processedRenderObjectIndex].rendererObject = -1;
         return;
     }
+#endif
 
-    processedOpaqueRendererObjects[instruction.processedRenderObjectIndex].rendererObject = lookupRendererObject(instruction.rendererObject);
+    processedOpaqueRendererObjects[instruction.processedRenderObjectIndex].rendererObject = instruction.rendererObject;
 }
 
 static void processTransparentRenderObject(const ProcessRendererObjectInstruction instruction) {
+#ifdef RENDERER_ENABLE_CULLING
     if (!aabbIsInFrustum(GET_RENDERER_OBJECT_AABB(lookupRendererObject(instruction.rendererObject)), lookupRendererObject(instruction.rendererObject)->transform.matrix, rendererFramePacket->view.frustum)) {
-        processedTransparentRendererObjects[instruction.processedRenderObjectIndex].rendererObject = NULL;
+        processedTransparentRendererObjects[instruction.processedRenderObjectIndex].rendererObject = -1;
         processedTransparentRendererObjects[instruction.processedRenderObjectIndex].distanceSqr = -1.0f;
         return;
     }
+#endif
 
     const float distanceSqr = glm_vec3_distance2(rendererFramePacket->view.pos, lookupRendererObject(instruction.rendererObject)->transform.matrix);
 
-    processedTransparentRendererObjects[instruction.processedRenderObjectIndex].rendererObject = lookupRendererObject(instruction.rendererObject);
+    processedTransparentRendererObjects[instruction.processedRenderObjectIndex].rendererObject = instruction.rendererObject;
     processedTransparentRendererObjects[instruction.processedRenderObjectIndex].distanceSqr = distanceSqr;
 }
 
@@ -73,18 +76,18 @@ static void iterateVisibleObjects() {
             case SIMPLE_OPAQUE_RENDERER_OBJECT:
             case UBER_OPAQUE_RENDERER_OBJECT:
                 Job processOpaqueRenderObjectJob;
-                initJob(&processOpaqueRenderObjectJob, NULL, processOpaqueRenderObject, (JobData){ .twoNumbers = { i, numOpaqueRendererObjects } }, "[Renderer] Process Opaque Renderer Object");
+                initJob(&processOpaqueRenderObjectJob, 0, NULL, processOpaqueRenderObject, (JobData){ .twoNumbers = { i, numOpaqueRendererObjects } }, "[Renderer] Process Opaque Renderer Object");
 
-                arrput(buildOpaqueDrawQueueJob.deps, processOpaqueRenderObjectJob);
+                arrput(buildOpaqueDrawQueueJob->deps.dynamicDeps, processOpaqueRenderObjectJob);
 
                 numOpaqueRendererObjects++;
                 break;
             case SIMPLE_TRANSPARENT_RENDERER_OBJECT:
             case UBER_TRANSPARENT_RENDERER_OBJECT:
                 Job processTransparentRenderObjectJob;
-                initJob(&processTransparentRenderObjectJob, NULL, processTransparentRenderObject, (JobData){ .twoNumbers = { i, numTransparentRendererObjects } }, "[Renderer] Process Transparent Renderer Object");
+                initJob(&processTransparentRenderObjectJob, 0, NULL, processTransparentRenderObject, (JobData){ .twoNumbers = { i, numTransparentRendererObjects } }, "[Renderer] Process Transparent Renderer Object");
 
-                arrput(buildTransparentsDrawQueueJob.deps, processTransparentRenderObjectJob);
+                arrput(buildTransparentsDrawQueueJob->deps.dynamicDeps, processTransparentRenderObjectJob);
 
                 numTransparentRendererObjects++;
                 break;
@@ -106,15 +109,20 @@ static void iterateVisibleObjects() {
 }
 
 static int compareOpaqueRendererObjectsByMaterialThenShaderThenMesh(const ProcessedOpaqueRendererObject* a, const ProcessedOpaqueRendererObject* b) {
+    // Sort culled objects last
+    if (a->rendererObject == -1 || b->rendererObject == -1) {
+        return b->rendererObject - a->rendererObject;
+    }
+
     int aMeshID;
     int aMaterialID;
     int aShaderID;
-    if (IS_RENDERER_OBJECT_SIMPLE(a->rendererObject)) {
-        aMeshID = a->rendererObject->mesh.simpleMesh;
+    if (IS_RENDERER_OBJECT_SIMPLE(lookupRendererObject(a->rendererObject))) {
+        aMeshID = lookupRendererObject(a->rendererObject)->mesh.simpleMesh;
         aMaterialID = lookupSimpleMesh(aMeshID)->material;
         aShaderID = lookupSimpleMaterial(aMaterialID)->shader;
     } else {
-        aMeshID = a->rendererObject->mesh.uberMesh;
+        aMeshID = lookupRendererObject(a->rendererObject)->mesh.uberMesh;
         //aMaterialID = uberMaterialOffset + lookupUberMesh(aMeshID)->material;
         aMaterialID = -1;
         //aShaderID = lookupUberMaterial(aMaterialID)->shader;
@@ -124,12 +132,12 @@ static int compareOpaqueRendererObjectsByMaterialThenShaderThenMesh(const Proces
     int bMeshID;
     int bMaterialID;
     int bShaderID;
-    if (IS_RENDERER_OBJECT_SIMPLE(b->rendererObject)) {
-        bMeshID = b->rendererObject->mesh.simpleMesh;
+    if (IS_RENDERER_OBJECT_SIMPLE(lookupRendererObject(b->rendererObject))) {
+        bMeshID = lookupRendererObject(b->rendererObject)->mesh.simpleMesh;
         bMaterialID = lookupSimpleMesh(bMeshID)->material;
         bShaderID = lookupSimpleMaterial(bMaterialID)->shader;
     } else {
-        bMeshID = b->rendererObject->mesh.uberMesh;
+        bMeshID = lookupRendererObject(b->rendererObject)->mesh.uberMesh;
         //bMaterialID = uberMaterialOffset + lookupUberMesh(bMeshID)->material;
         bMaterialID = -1;
         //bShaderID = lookupUberMaterial(bMaterialID)->shader;
@@ -152,7 +160,7 @@ static void buildOpaqueDrawQueue() {
         opaqueDrawInstructions = NULL;
     }
 
-    // Sorts render objects first by shader, then by material, then by mesh
+    // Sorts render objects first by shader, then by material, then by mesh, culled objects placed last
     qsort(processedOpaqueRendererObjects, numOpaqueRendererObjects, sizeof(ProcessedOpaqueRendererObject), compareOpaqueRendererObjectsByMaterialThenShaderThenMesh);
 
     int currentShaderID = -1;
@@ -160,12 +168,13 @@ static void buildOpaqueDrawQueue() {
     int currentMeshID = -1;
     for (int i = 0; i < numOpaqueRendererObjects; ++i) {
         const ProcessedOpaqueRendererObject* processedOpaqueRenderObject = &processedOpaqueRendererObjects[i];
+        if (processedOpaqueRenderObject->rendererObject == -1) break; // All remaining objects are culled since culled objects are always last
 
         int meshID;
         int materialID;
         int shaderID;
-        if (IS_RENDERER_OBJECT_SIMPLE(processedOpaqueRenderObject->rendererObject)) {
-            meshID = processedOpaqueRenderObject->rendererObject->mesh.simpleMesh;
+        if (IS_RENDERER_OBJECT_SIMPLE(lookupRendererObject(processedOpaqueRenderObject->rendererObject))) {
+            meshID = lookupRendererObject(processedOpaqueRenderObject->rendererObject)->mesh.simpleMesh;
             materialID = lookupSimpleMesh(meshID)->material;
             shaderID = lookupSimpleMaterial(materialID)->shader;
 
@@ -185,10 +194,13 @@ static void buildOpaqueDrawQueue() {
                 currentMeshID = meshID;
             }
 
+            const DrawInstruction bindTransformInstruction = { .type = DRAW_BIND_TRANSFORM, .data.rendererObject = processedOpaqueRenderObject->rendererObject };
+            arrput(opaqueDrawInstructions, bindTransformInstruction);
+
             const DrawInstruction drawSimpleMeshInstruction = { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
             arrput(opaqueDrawInstructions, drawSimpleMeshInstruction);
         } else {
-            const int uberMeshId = processedOpaqueRenderObject->rendererObject->mesh.uberMesh;
+            const int uberMeshId = lookupRendererObject(processedOpaqueRenderObject->rendererObject)->mesh.uberMesh;
             meshID = uberMeshOffset + uberMeshId;
             //materialID = uberMaterialOffset + lookupUberMesh(meshID)->material;
             materialID = -1;
@@ -211,6 +223,9 @@ static void buildOpaqueDrawQueue() {
             //     arrput(opaqueDrawInstructions, bindUberMeshDrawInstruction);
             //     currentMeshID = meshID;
             // }
+
+            const DrawInstruction bindTransformInstruction = { .type = DRAW_BIND_TRANSFORM, .data.rendererObject = processedOpaqueRenderObject->rendererObject };
+            arrput(opaqueDrawInstructions, bindTransformInstruction);
 
             // const DrawInstruction drawUberMeshInstruction = { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
             // arrput(opaqueDrawInstructions, drawUberMeshInstruction);
@@ -241,12 +256,13 @@ static void buildTransparentsDrawQueue() {
     int currentMeshID = -1;
     for (int i = 0; i < numTransparentRendererObjects; ++i) {
         const ProcessedTransparentRendererObject* processedTransparentRenderObject = &processedTransparentRendererObjects[i];
+        if (processedTransparentRenderObject->rendererObject == -1) break; // All remaining objects are culled since culled objects are always last
 
         int meshID;
         int materialID;
         int shaderID;
-        if (IS_RENDERER_OBJECT_SIMPLE(processedTransparentRenderObject->rendererObject)) {
-            meshID = processedTransparentRenderObject->rendererObject->mesh.simpleMesh;
+        if (IS_RENDERER_OBJECT_SIMPLE(lookupRendererObject(processedTransparentRenderObject->rendererObject))) {
+            meshID = lookupRendererObject(processedTransparentRenderObject->rendererObject)->mesh.simpleMesh;
             materialID = lookupSimpleMesh(meshID)->material;
             shaderID = lookupSimpleMaterial(materialID)->shader;
 
@@ -266,10 +282,13 @@ static void buildTransparentsDrawQueue() {
                 currentMeshID = meshID;
             }
 
+            const DrawInstruction bindTransformInstruction = { .type = DRAW_BIND_TRANSFORM, .data.rendererObject = processedTransparentRenderObject->rendererObject };
+            arrput(opaqueDrawInstructions, bindTransformInstruction);
+
             const DrawInstruction drawSimpleMeshInstruction = { .type = DRAW_SIMPLE_MESH, .data.simpleMesh = meshID };
             arrput(opaqueDrawInstructions, drawSimpleMeshInstruction);
         } else {
-            const int uberMeshId = processedTransparentRenderObject->rendererObject->mesh.uberMesh;
+            const int uberMeshId = lookupRendererObject(processedTransparentRenderObject->rendererObject)->mesh.uberMesh;
             meshID = uberMeshOffset + uberMeshId;
             //materialID = uberMaterialOffset + lookupUberMesh(meshID)->material;
             materialID = -1;
@@ -293,6 +312,9 @@ static void buildTransparentsDrawQueue() {
             //     currentMeshID = meshID;
             // }
 
+            const DrawInstruction bindTransformInstruction = { .type = DRAW_BIND_TRANSFORM, .data.rendererObject = processedTransparentRenderObject->rendererObject };
+            arrput(opaqueDrawInstructions, bindTransformInstruction);
+
             // const DrawInstruction drawUberMeshInstruction = { .type = DRAW_UBER_MESH, .data.uberMesh = uberMeshId };
             // arrput(opaqueDrawInstructions, drawUberMeshInstruction);
         }
@@ -300,23 +322,10 @@ static void buildTransparentsDrawQueue() {
 }
 
 static void mergeDrawQueues() {
-    if (arrlen(buildOpaqueDrawQueueJob.deps) > 1) {
-        for (int i = 1; i < arrlen(buildOpaqueDrawQueueJob.deps); ++i) {
-            freeJobAndDeps(&buildOpaqueDrawQueueJob.deps[i]);
-        }
-        arrfree(buildOpaqueDrawQueueJob.deps);
-        buildOpaqueDrawQueueJob.deps = NULL;
-        arrput(buildOpaqueDrawQueueJob.deps, iterateObjectsJob);
-    }
-
-    if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
-        for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
-            freeJobAndDeps(&buildTransparentsDrawQueueJob.deps[i]);
-        }
-        arrfree(buildTransparentsDrawQueueJob.deps);
-        buildTransparentsDrawQueueJob.deps = NULL;
-        arrput(buildTransparentsDrawQueueJob.deps, iterateObjectsJob);
-    }
+    lockJobTree(&renderTree);
+    clearJobDynamicDeps(buildOpaqueDrawQueueJob);
+    clearJobDynamicDeps(buildTransparentsDrawQueueJob);
+    unlockJobTree(&renderTree);
 
     if (drawInstructions != NULL) {
         arrfree(drawInstructions);
@@ -346,37 +355,43 @@ void initRenderer() {
 
     initRendererObjects();
 
+    Job iterateObjectsJob;
     {
-        initJob(&iterateObjectsJob, NULL, iterateVisibleObjects, (JobData){ NULL }, "Iterate Objects");
+        initJob(&iterateObjectsJob, 0, NULL, iterateVisibleObjects, (JobData){ NULL }, "Iterate Objects");
     }
 
+    Job buildOpaqueDrawQueueJobLcl;
     {
-        Job* buildOpaqueDrawQueueDeps = NULL;
-        arrput(buildOpaqueDrawQueueDeps, iterateObjectsJob);
+        Job* buildOpaqueDrawQueueDeps = malloc(1 * sizeof(Job));
+        buildOpaqueDrawQueueDeps[0] = iterateObjectsJob;
 
-        initJob(&buildOpaqueDrawQueueJob, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, (JobData){ NULL }, "Build Opaque Draw Queue");
+        initJob(&buildOpaqueDrawQueueJobLcl, 1, buildOpaqueDrawQueueDeps, buildOpaqueDrawQueue, (JobData){ NULL }, "Build Opaque Draw Queue");
     }
 
+    Job buildTransparentsDrawQueueJobLcl;
     {
-        Job* buildTransparentsDrawQueueDeps = NULL;
-        arrput(buildTransparentsDrawQueueDeps, iterateObjectsJob);
+        Job* buildTransparentsDrawQueueDeps = malloc(1 * sizeof(Job));
+        buildTransparentsDrawQueueDeps[0] = iterateObjectsJob;
 
-        initJob(&buildTransparentsDrawQueueJob, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, (JobData){ NULL }, "Build Transparents Draw Queue");
+        initJob(&buildTransparentsDrawQueueJobLcl, 1, buildTransparentsDrawQueueDeps, buildTransparentsDrawQueue, (JobData){ NULL }, "Build Transparents Draw Queue");
     }
 
     Job mergeDrawQueuesJob;
     {
-        Job* mergeDrawQueuesDeps = NULL;
-        arrput(mergeDrawQueuesDeps, buildOpaqueDrawQueueJob);
-        arrput(mergeDrawQueuesDeps, buildTransparentsDrawQueueJob);
+        Job* mergeDrawQueuesDeps = malloc(2 * sizeof(Job));
+        mergeDrawQueuesDeps[0] = buildOpaqueDrawQueueJobLcl;
+        mergeDrawQueuesDeps[1] = buildTransparentsDrawQueueJobLcl;
 
-        initJob(&mergeDrawQueuesJob, mergeDrawQueuesDeps, mergeDrawQueues, (JobData){ NULL }, "Merge Draw Queues");
+        buildOpaqueDrawQueueJob = &mergeDrawQueuesDeps[0];
+        buildTransparentsDrawQueueJob = &mergeDrawQueuesDeps[1];
+
+        initJob(&mergeDrawQueuesJob, 2, mergeDrawQueuesDeps , mergeDrawQueues, (JobData){ NULL }, "Merge Draw Queues");
     }
 
-    Job* renderTreeJobs = NULL;
-    arrput(renderTreeJobs, mergeDrawQueuesJob);
+    Job* renderTreeJobs = malloc(1 * sizeof(Job));
+    renderTreeJobs[0] = mergeDrawQueuesJob;
 
-    initJobTree(&renderTree, renderTreeJobs, "Renderer");
+    initJobTree(&renderTree, 1, renderTreeJobs, "Renderer");
 }
 
 void freeRenderer() {
@@ -385,23 +400,8 @@ void freeRenderer() {
 }
 
 void executeRenderTreeAsync() {
-    if (arrlen(buildOpaqueDrawQueueJob.deps) > 1) {
-        for (int i = 1; i < arrlen(buildOpaqueDrawQueueJob.deps); ++i) {
-            freeJobAndDeps(&buildOpaqueDrawQueueJob.deps[i]);
-        }
-        arrfree(buildOpaqueDrawQueueJob.deps);
-        buildOpaqueDrawQueueJob.deps = NULL;
-        arrput(buildOpaqueDrawQueueJob.deps, iterateObjectsJob);
-    }
-
-    if (arrlen(buildTransparentsDrawQueueJob.deps) > 1 ) {
-        for (int i = 1; i < arrlen(buildTransparentsDrawQueueJob.deps); ++i) {
-            freeJobAndDeps(&buildTransparentsDrawQueueJob.deps[i]);
-        }
-        arrfree(buildTransparentsDrawQueueJob.deps);
-        buildTransparentsDrawQueueJob.deps = NULL;
-        arrput(buildTransparentsDrawQueueJob.deps, iterateObjectsJob);
-    }
+    clearJobDynamicDeps(buildOpaqueDrawQueueJob);
+    clearJobDynamicDeps(buildTransparentsDrawQueueJob);
 
     resetJobTree(&renderTree);
     executeJobTreeAsync(&renderTree);

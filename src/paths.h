@@ -8,10 +8,10 @@
 #ifdef _WIN32
 
 #define DIR "\\"
-#define ROOT_DIR "C:\\Users\\wehuf\\CLionProjects\\cengine\\"
+#define ROOT_DIR "C:\\Users\\wehuf\\CLionProjects\\cengine_2\\"
 
 #endif
 
-#define ASSETS_DIR ROOT_DIR "Assets" DIR
+#define ASSETS_DIR ROOT_DIR "assets" DIR
 
 #endif //PATHS_H

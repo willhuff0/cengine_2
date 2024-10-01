@@ -23,7 +23,12 @@ void freeJobSystem();
 void executeJobTreeAsync(const JobTree* jobTree);
 void executeJobTreeSync(JobTree* jobTree);
 
-// Gets the next job to execute and acquires a mutex lock. If there are no jobs to execute, returns nullptr.
+// Must have jobSystemMutex lock
+// Should only be called from worker threads.
+void deleteJobTree(const JobTree* jobTree);
+
+// Must have jobSystemMutex lock
+// Gets the next job to execute and sets inProgress to true. If there are no jobs to execute, returns NULL.
 // Should only be called from worker threads.
 GetNextJobResult getNextJob();
 

@@ -61,14 +61,22 @@ void executeJobTreeSync(JobTree* jobTree) {
     waitForJobTreeToFinish(jobTree);
 }
 
+void deleteJobTree(const JobTree* jobTree) {
+    for (int i = arrlen(jobTrees) - 1; i >= 0; --i) {
+        if (jobTree == jobTrees[i]) {
+            arrdel(jobTrees, i);
+        }
+    }
+}
+
 // Returns NULL if job itself or all deps are in progress
 static Job* findIncompleteJob(Job* job) {
     if (job->inProgress) return NULL;
     if (job->done) return job;
 
     bool depInProgress = false;
-    for (int i = 0; i < arrlen(job->deps); ++i) {
-        Job* result = findIncompleteJob(&job->deps[i]);
+    for (int i = 0; i < job->deps.numDeps; ++i) {
+        Job* result = findIncompleteJob(&job->deps.deps[i]);
 
         if (result == NULL) {
             depInProgress = true;
@@ -78,7 +86,17 @@ static Job* findIncompleteJob(Job* job) {
 
         return result;
     }
+    for (int i = 0; i < arrlen(job->deps.dynamicDeps); ++i) {
+        Job* result = findIncompleteJob(&job->deps.dynamicDeps[i]);
 
+        if (result == NULL) {
+            depInProgress = true;
+            continue;
+        }
+        if (result->done) continue;
+
+        return result;
+    }
     if (depInProgress) return NULL;
 
     return job;
@@ -99,7 +117,7 @@ GetNextJobResult getNextJob() {
             continue;
         }
 
-        for (int k = 0; k < arrlen(jobTree->jobs); ++k) {
+        for (int k = 0; k < jobTree->numJobs; ++k) {
             Job* next = findIncompleteJob(&jobTree->jobs[k]);
 
             if (next == NULL) continue;

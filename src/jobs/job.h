@@ -11,6 +11,12 @@
 
 typedef struct Job Job;
 
+typedef struct JobDeps {
+    int numDeps;
+    Job* deps;
+    Job* dynamicDeps;
+} JobDeps;
+
 typedef union {
     void* ptr;
     int64_t number;
@@ -23,7 +29,7 @@ typedef union {
 
 struct Job {
     const char* name;
-    Job* deps;
+    JobDeps deps;
     void (*execute)(JobData data);
     JobData data;
 
@@ -35,6 +41,7 @@ struct Job {
 typedef struct {
     const char* name;
     pthread_mutex_t* mutex;
+    int numJobs;
     Job* jobs;
     bool done;
 
@@ -42,11 +49,13 @@ typedef struct {
     bool locked;
 } JobTree;
 
-void initJob(Job* job, Job* deps, void (*execute)(JobData data), const JobData data, const char* name);
+void initJob(Job* job, const int numDeps, Job* deps, void (*execute)(JobData data), const JobData data, const char* name);
 void freeJobAndDeps(Job* job);
 
-void initJobTree(JobTree* jobTree, Job* jobs, const char* name);
-void freeJobTree(JobTree* jobTree);
+void clearJobDynamicDeps(Job* job);
+
+void initJobTree(JobTree* jobTree, const int numJobs, Job* jobs, const char* name);
+void freeJobTree(const JobTree* jobTree);
 // Locks job tree for the caller
 void resetJobTree(JobTree* jobTree);
 

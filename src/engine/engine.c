@@ -24,6 +24,8 @@ void initEngine() {
     initWindow();
     initInput();
     initFramePackets();
+    initDrawSystem();
+    initAssets();
 
     initSim();
     initRenderer();
@@ -41,6 +43,8 @@ void freeEngine() {
     freeRenderer();
     freeSim();
 
+    freeAssets();
+    freeDrawSystem();
     freeFramePackets();
     freeInput();
     freeWindow();
@@ -63,9 +67,6 @@ void engineLoop() {
 
         // Wait for renderer to finish
         waitForJobTreeToFinish(&renderTree);
-
-        // Prep OpenGL for drawing
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Execute draw queue
         executeDrawQueue();

@@ -7,6 +7,8 @@
 
 #include "../jobs/jobs.h"
 
+#define RENDERER_ENABLE_CULLING
+
 extern JobTree renderTree;
 
 void initRenderer();

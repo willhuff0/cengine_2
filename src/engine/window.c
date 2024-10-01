@@ -32,7 +32,7 @@ void initWindow() {
 
     glfwSetErrorCallback(glfw_ErrorCallback);
 
-    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_D3D11);
+    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_VULKAN);
     if (!glfwInit()) {
         error("Failed to initialize GLFW");
         return;
@@ -41,7 +41,7 @@ void initWindow() {
     glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_SAMPLES, 8);
     window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "cengine_2", NULL, NULL);
     if (window == NULL) {
@@ -110,3 +110,6 @@ void windowDisableInputCallbacks() {
 const char* windowGetGLFWVersionString() {
     return glfwGetVersionString();
 }
+
+int getWindowWidth() { return windowWidth; }
+int getWindowHeight() { return windowHeight;}

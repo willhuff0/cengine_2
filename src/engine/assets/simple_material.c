@@ -21,5 +21,5 @@ SimpleMaterial* lookupSimpleMaterial(const SimpleMaterialID id) {
 }
 
 void bindSimpleMaterial(const SimpleMaterialID id) {
-    setUniformVec4(lookupSimpleMaterial(id)->shader, "CENGINE_SIMPLE_MATERIAL_COLOR", lookupSimpleMaterial(id)->color);
+    setUniformVec4(lookupSimpleMaterial(id)->shader, "u_color", lookupSimpleMaterial(id)->color);
 }

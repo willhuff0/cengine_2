@@ -33,11 +33,15 @@ static void workerFunc(char* name) {
         getNextJobResult.job->done = true;
 
         bool done = true;
-        for (int i = 0; i < arrlen(getNextJobResult.jobTree->jobs); ++i) {
+        for (int i = 0; i < getNextJobResult.jobTree->numJobs; ++i) {
             if (!getNextJobResult.jobTree->jobs[i].done) done = false;
         }
         if (done) {
             getNextJobResult.jobTree->done = true;
+
+            pthread_mutex_lock(&jobSystemMutex);
+            deleteJobTree(getNextJobResult.jobTree);
+            pthread_mutex_unlock(&jobSystemMutex);
         }
 
         unlockJobTree(getNextJobResult.jobTree);

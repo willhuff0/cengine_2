@@ -7,12 +7,14 @@
 
 #include "assets/shader.h"
 #include "assets/simple_material.h"
+#include "../renderer/renderer_object.h"
 #include "assets/simple_mesh.h"
 
 typedef enum {
     DRAW_BIND_SHADER,
     DRAW_BIND_SIMPLE_MATERIAL,
     DRAW_BIND_SIMPLE_MESH,
+    DRAW_BIND_TRANSFORM,
     DRAW_SIMPLE_MESH,
 } DrawInstructionType;
 
@@ -21,6 +23,7 @@ typedef struct {
     union DrawInstructionData {
         ShaderID shader;
         SimpleMaterialID simpleMaterial;
+        RendererObjectID rendererObject;
         SimpleMeshID simpleMesh;
     } data;
 } DrawInstruction;

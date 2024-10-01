@@ -35,13 +35,13 @@ void initInput() {
     mouseDeltaX = 0.0;
     mouseDeltaY = 0.0;
 
-    windowHideCursor();
+    //windowHideCursor();
     windowEnableInputCallbacks();
 }
 
 void freeInput() {
     windowDisableInputCallbacks();
-    windowShowCursor();
+    //windowShowCursor();
 
     hmfree(keysDown);
     hmfree(keysHeld);

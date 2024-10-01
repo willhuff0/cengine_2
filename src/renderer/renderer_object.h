@@ -6,7 +6,6 @@
 #define RENDERER_OBJECT_H
 
 #include "../engine/assets.h"
-#include "../engine/transform.h"
 
 typedef int RendererObjectID;
 
@@ -18,10 +17,6 @@ typedef enum {
 } RendererObjectMeshType;
 
 typedef struct {
-    vec3 pos;
-    versor rot;
-    vec3 scale;
-
     mat4 matrix;
 } RendererObjectTransform;
 
@@ -55,5 +50,6 @@ RendererObjectID registerSimpleRendererObject(const SimpleMeshID simpleMesh, con
 
 RendererObject* lookupRendererObject(const RendererObjectID id);
 
+void bindRendererObjectTransform(const RendererObjectID id);
 
 #endif //RENDERER_OBJECT_H

@@ -73,7 +73,7 @@ static void lookupShaderUniformLocations(Shader* shader) {
     }
 }
 
-ShaderID createShaderFromPaths(const char* vertexPath, const char* fragmentPath) {
+ShaderID createShaderFromPaths(const char* vertexPath, const char* fragmentPath, const bool bindCengineUbo) {
     GLuint vertShader;
     if (!createShader(&vertShader, vertexPath, GL_VERTEX_SHADER)) {
         return -1;
@@ -100,6 +100,11 @@ ShaderID createShaderFromPaths(const char* vertexPath, const char* fragmentPath)
         printProgramInfoLog(program);
         glDeleteProgram(program);
         return -1;
+    }
+
+    if (bindCengineUbo) {
+        glUseProgram(program);
+        glUniformBlockBinding(program, glGetUniformBlockIndex(program, "CEngine"), 0);
     }
 
     Shader shader = { program, NULL };
@@ -139,3 +144,11 @@ void setUniformVec2  (const ShaderID id, const char* name, const vec2  value) { 
 void setUniformVec3  (const ShaderID id, const char* name, const vec3  value) { glUniform3fv(getUniformLocation(id, name), 1, value); }
 void setUniformVec4  (const ShaderID id, const char* name, const vec4  value) { glUniform4fv(getUniformLocation(id, name), 1, value); }
 void setUniformMat4  (const ShaderID id, const char* name, const mat4  value) { glUniformMatrix4fv(getUniformLocation(id, name), 1, GL_FALSE, (const float*)value); }
+
+void setUniformBoolAt  (const GLint location, const bool  value) { setUniformIntAt(location, value ? 1 : 0); }
+void setUniformIntAt   (const GLint location, const int   value) { glUniform1i(location, value); }
+void setUniformFloatAt (const GLint location, const float value) { glUniform1f(location, value); }
+void setUniformVec2At  (const GLint location, const vec2  value) { glUniform2fv(location, 1, value); }
+void setUniformVec3At  (const GLint location, const vec3  value) { glUniform3fv(location, 1, value); }
+void setUniformVec4At  (const GLint location, const vec4  value) { glUniform4fv(location, 1, value); }
+void setUniformMat4At  (const GLint location, const mat4  value) { glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)value); }
