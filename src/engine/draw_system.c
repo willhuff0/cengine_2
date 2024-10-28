@@ -63,8 +63,6 @@ void executeDrawQueue() {
 
     extractPlanesFromViewProjMat(viewProjMat, rendererFramePacket->view.frustum);
 
-    int numDrawCalls = 0;
-
     // Execute draw instructions
     for (int i = 0; i < arrlen(drawInstructions); ++i) {
         switch (drawInstructions[i].type) {
@@ -81,13 +79,10 @@ void executeDrawQueue() {
                 bindRendererObjectTransform(drawInstructions[i].data.rendererObject);
                 break;
             case DRAW_SIMPLE_MESH:
-                numDrawCalls++;
                 drawSimpleMesh(drawInstructions[i].data.simpleMesh);
                 break;
         }
     }
-
-    printf("Number of draw calls: %d\n", numDrawCalls);
 
     arrfree(drawInstructions);
     drawInstructions = NULL;

@@ -28,15 +28,19 @@ int main(void)
     loadSimpleModel(ASSETS_DIR "shapes" DIR "cube.obj", simpleMaterial, &simpleModel);
 
     const float xSpace = 1.5f;
+    const float ySpace = 1.5f;
     const float zSpace = 1.5f;
 
-    const int numX = 10;
-    const int numZ = 10;
+    const int numX = 40;
+    const int numY = 1;
+    const int numZ = 40;
 
     for (int x = 0; x < numX; ++x) {
-        for (int z = 0; z < numZ; ++z) {
-            const RendererObjectID rendererObject = registerSimpleRendererObject(simpleModel.meshes[0], false);
-            glm_translate_make(lookupRendererObject(rendererObject)->transform.matrix, (vec3){((float)x - (float)numX / 2.0f + 0.5f) * xSpace, 0.0f, ((float)z - (float)numZ / 2.0f + 0.5f) * zSpace});
+        for (int y = 0; y < numY; ++y) {
+            for (int z = 0; z < numZ; ++z) {
+                const RendererObjectID rendererObject = registerSimpleRendererObject(simpleModel.meshes[0], false);
+                glm_translate_make(lookupRendererObject(rendererObject)->transform.matrix, (vec3){((float)x ) * xSpace,  ((float)y - (float)numY / 2.0f + 0.5f) * ySpace, ((float)z - (float)numZ / 2.0f + 0.5f) * zSpace});
+            }
         }
     }
 
